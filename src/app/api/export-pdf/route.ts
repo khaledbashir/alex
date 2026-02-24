@@ -2,57 +2,57 @@ import { NextRequest } from "next/server";
 
 // ── Currency formatter ──
 const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
 // ── Builds a clean, self-contained HTML document for jsreport ──
 function buildReportHTML(data: {
-    project: { project_name: string; project_no: string; contractor: string; report_period: string; report_date: string; total_contract_value: number };
-    isProject2: boolean;
-    diversity_goals: Record<string, number>;
-    subcontractors: Array<{ id: string; code: string; name: string; total_contract: number; towards_goal: number; total_paid_to_date: number; balance: number }>;
-    workforce: Array<{ employer: string; asian: number; black: number; hispanic: number; white: number; pacific_islander: number; unknown: number }>;
-    p2_util: Array<{ id: string; company: string; value: number; towards_goal: number; paid_to_date: number; pending_payment: number }>;
-    p2_eeo: Array<{ id: string; company: string; race_ethnicity: string; gender: string; num_employees: number; hours_worked: number }>;
-    catTotals: Record<string, { contract: number; paid: number; count: number }>;
-    p2Totals: { contract: number; towardsGoal: number; paid: number; headcount: number; hours: number };
+  project: { project_name: string; project_no: string; contractor: string; report_period: string; report_date: string; total_contract_value: number };
+  isProject2: boolean;
+  diversity_goals: Record<string, number>;
+  subcontractors: Array<{ id: string; code: string; name: string; total_contract: number; towards_goal: number; total_paid_to_date: number; balance: number }>;
+  workforce: Array<{ employer: string; asian: number; black: number; hispanic: number; white: number; pacific_islander: number; unknown: number }>;
+  p2_util: Array<{ id: string; company: string; value: number; towards_goal: number; paid_to_date: number; pending_payment: number }>;
+  p2_eeo: Array<{ id: string; company: string; race_ethnicity: string; gender: string; num_employees: number; hours_worked: number }>;
+  catTotals: Record<string, { contract: number; paid: number; count: number }>;
+  p2Totals: { contract: number; towardsGoal: number; paid: number; headcount: number; hours: number };
 }): string {
-    const { project: P, isProject2, diversity_goals, subcontractors, workforce, p2_util, p2_eeo, catTotals, p2Totals } = data;
+  const { project: P, isProject2, diversity_goals, subcontractors, workforce, p2_util, p2_eeo, catTotals, p2Totals } = data;
 
-    const totalMWBEPaid = Object.values(catTotals).reduce((a, c) => a + c.paid, 0);
-    const totalHeadcount = workforce.reduce((s, w) => s + w.asian + w.black + w.hispanic + w.white + w.pacific_islander + w.unknown, 0);
+  const totalMWBEPaid = Object.values(catTotals).reduce((a, c) => a + c.paid, 0);
+  const totalHeadcount = workforce.reduce((s, w) => s + w.asian + w.black + w.hispanic + w.white + w.pacific_islander + w.unknown, 0);
 
-    // Compliance table rows
-    const complianceRows = Object.entries(diversity_goals).map(([code, goal]) => {
-        const actual = (catTotals[code]?.contract || 0) / P.total_contract_value;
-        const met = actual >= goal;
-        return `<tr>
+  // Compliance table rows
+  const complianceRows = Object.entries(diversity_goals).map(([code, goal]) => {
+    const actual = (catTotals[code]?.contract || 0) / P.total_contract_value;
+    const met = actual >= goal;
+    return `<tr>
       <td><strong>${code}</strong></td>
       <td>${pct(goal)}</td>
       <td style="color:${met ? '#16a34a' : '#dc2626'}; font-weight:700">${pct(actual)}</td>
       <td>${fmt(catTotals[code]?.contract || 0)}</td>
       <td>${met ? '✓ Met' : '✗ Below'}</td>
     </tr>`;
-    }).join("");
+  }).join("");
 
-    // Payment table rows
-    const paymentRows = isProject2
-        ? p2_util.map(r => `<tr><td><strong>${r.company}</strong></td><td>${fmt(r.value)}</td><td>${fmt(r.towards_goal)}</td><td>${fmt(r.paid_to_date)}</td><td>${r.pending_payment > 0 ? 'Pending' : 'Current'}</td></tr>`).join("")
-        : subcontractors.map(r => `<tr><td><strong>${r.name}</strong> <span class="code-tag">${r.code}</span></td><td>${fmt(r.total_contract)}</td><td>${fmt(r.towards_goal)}</td><td>${fmt(r.total_paid_to_date)}</td><td>${r.balance > 0 ? 'Balance Due' : 'Paid Full'}</td></tr>`).join("");
+  // Payment table rows
+  const paymentRows = isProject2
+    ? p2_util.map(r => `<tr><td><strong>${r.company}</strong></td><td>${fmt(r.value)}</td><td>${fmt(r.towards_goal)}</td><td>${fmt(r.paid_to_date)}</td><td>${r.pending_payment > 0 ? 'Pending' : 'Current'}</td></tr>`).join("")
+    : subcontractors.map(r => `<tr><td><strong>${r.name}</strong> <span class="code-tag">${r.code}</span></td><td>${fmt(r.total_contract)}</td><td>${fmt(r.towards_goal)}</td><td>${fmt(r.total_paid_to_date)}</td><td>${r.balance > 0 ? 'Balance Due' : 'Paid Full'}</td></tr>`).join("");
 
-    // Workforce table rows
-    const workforceRows = isProject2
-        ? p2_eeo.slice(0, 50).map(r => `<tr><td><strong>${r.company}</strong></td><td colspan="6">${r.num_employees} employees (${r.race_ethnicity} – ${r.gender})</td></tr>`).join("")
-        : workforce.map(r => `<tr><td><strong>${r.employer}</strong></td><td>${r.asian}</td><td>${r.black}</td><td>${r.hispanic}</td><td>${r.white}</td><td>${r.pacific_islander}</td><td>${r.unknown}</td></tr>`).join("");
+  // Workforce table rows
+  const workforceRows = isProject2
+    ? p2_eeo.slice(0, 50).map(r => `<tr><td><strong>${r.company}</strong></td><td colspan="6">${r.num_employees} employees (${r.race_ethnicity} – ${r.gender})</td></tr>`).join("")
+    : workforce.map(r => `<tr><td><strong>${r.employer}</strong></td><td>${r.asian}</td><td>${r.black}</td><td>${r.hispanic}</td><td>${r.white}</td><td>${r.pacific_islander}</td><td>${r.unknown}</td></tr>`).join("");
 
-    // Executive Summary paragraph
-    const execSummary = isProject2
-        ? `As of this period, the total tracked contract value stands at <strong>${fmt(p2Totals.contract)}</strong>. Total payments to date amount to <strong>${fmt(p2Totals.paid)}</strong>, representing <strong>${pct(p2Totals.contract > 0 ? p2Totals.paid / p2Totals.contract : 0)}</strong> of the total contract value. The project tracks utilization across <strong>${p2_util.length} recorded firms</strong> and monitors EEO compliance for <strong>${p2Totals.headcount.toLocaleString()} employees</strong>.`
-        : `As of this period, the total contract value stands at <strong>${fmt(P.total_contract_value)}</strong>. Total MWBE/SDVOB payments to date amount to <strong>${fmt(totalMWBEPaid)}</strong>, representing <strong>${pct(totalMWBEPaid / P.total_contract_value)}</strong> of the contract value. The project engages <strong>${subcontractors.length} certified diverse subcontractors</strong>.`;
+  // Executive Summary paragraph
+  const execSummary = isProject2
+    ? `As of this period, the total tracked contract value stands at <strong>${fmt(p2Totals.contract)}</strong>. Total payments to date amount to <strong>${fmt(p2Totals.paid)}</strong>, representing <strong>${pct(p2Totals.contract > 0 ? p2Totals.paid / p2Totals.contract : 0)}</strong> of the total contract value. The project tracks utilization across <strong>${p2_util.length} recorded firms</strong> and monitors EEO compliance for <strong>${p2Totals.headcount.toLocaleString()} employees</strong>.`
+    : `As of this period, the total contract value stands at <strong>${fmt(P.total_contract_value)}</strong>. Total MWBE/SDVOB payments to date amount to <strong>${fmt(totalMWBEPaid)}</strong>, representing <strong>${pct(totalMWBEPaid / P.total_contract_value)}</strong> of the contract value. The project engages <strong>${subcontractors.length} certified diverse subcontractors</strong>.`;
 
-    const headcountDisplay = isProject2 ? p2Totals.headcount.toLocaleString() : totalHeadcount.toLocaleString();
+  const headcountDisplay = isProject2 ? p2Totals.headcount.toLocaleString() : totalHeadcount.toLocaleString();
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -281,66 +281,72 @@ function buildReportHTML(data: {
 }
 
 export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json();
+  try {
+    const body = await req.json();
 
-        if (!body.project) {
-            return new Response(JSON.stringify({ error: "No report data provided" }), {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-            });
-        }
-
-        const reportHTML = buildReportHTML(body);
-
-        const JSREPORT_URL = process.env.JSREPORT_URL || "http://jsreport:5488";
-
-        const res = await fetch(`${JSREPORT_URL}/api/report`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                template: {
-                    engine: "none",
-                    recipe: "chrome-pdf",
-                    content: reportHTML,
-                    chrome: {
-                        printBackground: true,
-                        displayHeaderFooter: false,
-                        marginTop: "0mm",
-                        marginBottom: "0mm",
-                        marginLeft: "0mm",
-                        marginRight: "0mm",
-                        waitForNetworkIdle: true,
-                        format: "Letter",
-                    },
-                },
-            }),
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            console.error("jsreport error:", res.status, errorText);
-            return new Response(JSON.stringify({ error: "PDF generation failed", details: errorText }), {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-            });
-        }
-
-        const pdfBuffer = await res.arrayBuffer();
-        const filename = body.filename || "report.pdf";
-
-        return new Response(pdfBuffer, {
-            status: 200,
-            headers: {
-                "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="${filename}"`,
-            },
-        });
-    } catch (error) {
-        console.error("Export API Error:", error);
-        return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-        });
+    if (!body.project) {
+      return new Response(JSON.stringify({ error: "No report data provided" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
+
+    const reportHTML = buildReportHTML(body);
+
+    const JSREPORT_URL = process.env.JSREPORT_URL || "http://jsreport:5488";
+    const jsreportUser = process.env.JSREPORT_USER || "admin";
+    const jsreportPass = process.env.JSREPORT_PASS || "admin";
+    const auth = Buffer.from(`${jsreportUser}:${jsreportPass}`).toString("base64");
+
+    const res = await fetch(`${JSREPORT_URL}/api/report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      body: JSON.stringify({
+        template: {
+          engine: "none",
+          recipe: "chrome-pdf",
+          content: reportHTML,
+          chrome: {
+            printBackground: true,
+            displayHeaderFooter: false,
+            marginTop: "0mm",
+            marginBottom: "0mm",
+            marginLeft: "0mm",
+            marginRight: "0mm",
+            waitForNetworkIdle: true,
+            format: "Letter",
+          },
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("jsreport error:", res.status, errorText);
+      return new Response(JSON.stringify({ error: "PDF generation failed", details: errorText }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const pdfBuffer = await res.arrayBuffer();
+    const filename = body.filename || "report.pdf";
+
+    return new Response(pdfBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
+    });
+  } catch (error) {
+    console.error("Export API Error:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
