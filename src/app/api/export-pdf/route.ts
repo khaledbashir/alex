@@ -1,4 +1,10 @@
 import { NextRequest } from "next/server";
+import { PDFDocument } from "pdf-lib";
+
+// Allow large request bodies for PDF attachments (up to 50MB)
+export const config = {
+  api: { bodyParser: { sizeLimit: '50mb' } },
+};
 
 // ── Currency formatter ──
 const fmt = (n: number) =>
@@ -332,10 +338,39 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const pdfBuffer = await res.arrayBuffer();
+    let finalPdfBytes = new Uint8Array(await res.arrayBuffer());
+
+    // ── Merge uploaded attachment PDFs ──
+    const attachments: Record<string, string> | undefined = body.attachments;
+    if (attachments && Object.keys(attachments).length > 0) {
+      const mergedPdf = await PDFDocument.create();
+
+      // Copy all pages from the main report
+      const mainDoc = await PDFDocument.load(finalPdfBytes);
+      const mainPages = await mergedPdf.copyPages(mainDoc, mainDoc.getPageIndices());
+      mainPages.forEach((page) => mergedPdf.addPage(page));
+
+      // Merge each attachment in order (C, D, E, F)
+      for (const key of ["C", "D", "E", "F"]) {
+        if (attachments[key]) {
+          try {
+            const attachmentBytes = Buffer.from(attachments[key], "base64");
+            const attachmentDoc = await PDFDocument.load(attachmentBytes);
+            const attachmentPages = await mergedPdf.copyPages(attachmentDoc, attachmentDoc.getPageIndices());
+            attachmentPages.forEach((page) => mergedPdf.addPage(page));
+          } catch (err) {
+            console.error(`Failed to merge attachment ${key}:`, err);
+            // Skip broken attachments rather than failing the entire export
+          }
+        }
+      }
+
+      finalPdfBytes = new Uint8Array(await mergedPdf.save());
+    }
+
     const filename = body.filename || "report.pdf";
 
-    return new Response(pdfBuffer, {
+    return new Response(finalPdfBytes, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

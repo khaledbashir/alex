@@ -26,6 +26,9 @@ export default function DIReportEngine() {
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState("overview");
   const [isExporting, setIsExporting] = useState(false);
+  const [attachments, setAttachments] = useState<Record<string, File | null>>({
+    C: null, D: null, E: null, F: null,
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -78,9 +81,26 @@ export default function DIReportEngine() {
       total_contract_value: 48750000
     };
 
+  // Convert a File to base64 for sending to API
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
+      // Prepare attachment base64 data
+      const attachmentData: Record<string, string> = {};
+      for (const [key, file] of Object.entries(attachments)) {
+        if (file) {
+          attachmentData[key] = await fileToBase64(file);
+        }
+      }
+
       const response = await fetch('/api/export-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,6 +127,7 @@ export default function DIReportEngine() {
             headcount: p2TotalHeadcount,
             hours: p2TotalHours,
           },
+          attachments: attachmentData,
           filename: `${PROJECT.project_name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.pdf`,
         }),
       });
@@ -974,17 +995,44 @@ export default function DIReportEngine() {
               </div>
             </div>
 
-            {/* ATTACHMENTS C–F */}
-            {[
-              ["ATTACHMENT C: Contractor Logs", "Pages 20–21: Subcontractor site logs"],
-              ["ATTACHMENT D: Correspondence", "Pages 22–24: Email outreach documentation"],
-              ["ATTACHMENT E: Certificates", "Pages 25–26: MWBE/SDVOB Certifications"],
-              ["ATTACHMENT F: Waiver Determination", "Page 27: Official state waiver documentation"],
-            ].map(([title, desc]) => (
-              <div key={title} className="print-page" style={{ ...styles.reportPage, opacity: 0.6 } as React.CSSProperties}>
+            {/* ATTACHMENTS C–F: Upload Zones */}
+            {([
+              ["C", "ATTACHMENT C: Contractor Logs", "Subcontractor site logs"],
+              ["D", "ATTACHMENT D: Correspondence", "Email outreach documentation"],
+              ["E", "ATTACHMENT E: Certificates", "MWBE/SDVOB Certifications"],
+              ["F", "ATTACHMENT F: Waiver Determination", "Official state waiver documentation"],
+            ] as const).map(([key, title, desc]) => (
+              <div key={key} className="print-page" style={{ ...styles.reportPage, border: attachments[key] ? '2px solid #16a34a' : '2px dashed #cbd5e1' } as React.CSSProperties}>
                 <div style={styles.reportSection as React.CSSProperties}>
                   <h3 style={styles.reportSectionTitle as React.CSSProperties}>{title}</h3>
-                  <p style={{ ...styles.reportText, color: "#94a3b8" } as React.CSSProperties}>[{desc} — attach physical documents here]</p>
+                  {attachments[key] ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                      <span style={{ fontSize: 24 }}>✅</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#16a34a' }}>{attachments[key]!.name}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: 12, color: '#64748b' }}>{(attachments[key]!.size / 1024).toFixed(0)} KB — will be merged into final PDF</p>
+                      </div>
+                      <button
+                        onClick={() => setAttachments(prev => ({ ...prev, [key]: null }))}
+                        style={{ background: 'none', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                      >Remove</button>
+                    </div>
+                  ) : (
+                    <label style={{ display: 'block', padding: '40px 20px', textAlign: 'center', cursor: 'pointer', borderRadius: 8, border: '2px dashed #cbd5e1', background: '#f8fafc', transition: 'border-color 0.2s' }}>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setAttachments(prev => ({ ...prev, [key]: file }));
+                        }}
+                      />
+                      <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>📎</span>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>Upload {desc}</p>
+                      <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>Click to browse or drag a PDF file here</p>
+                    </label>
+                  )}
                 </div>
               </div>
             ))}
