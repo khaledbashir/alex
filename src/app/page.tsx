@@ -124,7 +124,7 @@ export default function DIReportEngine() {
                 <polyline points="9 15 12 12 15 15" />
               </svg>
             </div>
-            <p style={styles.uploadTitle as React.CSSProperties}>Drop your quarterly Excel data here</p>
+            <p style={styles.uploadTitle as React.CSSProperties}>Drop your Excel report data here</p>
             <p style={styles.uploadSub as React.CSSProperties}>Accepts .xlsx, .xls, .csv — Raw data, Ad sheets, payment reports</p>
           </div>
 
@@ -150,7 +150,7 @@ export default function DIReportEngine() {
             {[
               { icon: "📊", title: "Auto-Parse", desc: "Extracts subcontractor data, payments, workforce hours from raw Excel" },
               { icon: "📈", title: "Chart Generation", desc: "Diversity goal tracking, payment breakdowns, workforce demographics" },
-              { icon: "📄", title: "Report Export", desc: "Branded quarterly report matching your exact template structure" },
+              { icon: "📄", title: "Report Export", desc: "Branded dynamic report matching your exact template structure" },
             ].map((item, i) => (
               <div key={i} style={styles.infoCard as React.CSSProperties}>
                 <span style={{ fontSize: 28 }}>{item.icon}</span>
@@ -200,8 +200,8 @@ export default function DIReportEngine() {
 
   // ── DASHBOARD / REPORT SCREEN ──
   const PROJECT = isProject2
-    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", quarter: 'Q4 2025', report_date: "2025-12-31", total_contract_value: p2TotalContract }
-    : { ...project_details, quarter: 'Q4 2025', report_date: "2025-12-31", total_contract_value: 48750000 };
+    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", report_period: 'Q4 2025', report_date: "2025-12-31", total_contract_value: p2TotalContract }
+    : { ...project_details, report_period: 'Q4 2025', report_date: "2025-12-31", total_contract_value: 48750000 };
 
   const goalData = Object.entries(diversity_goals).map(([code, goal]) => ({
     code,
@@ -243,7 +243,7 @@ export default function DIReportEngine() {
   return (
     <div style={styles.app as React.CSSProperties}>
       <style>{keyframes}</style>
-      <Header subtitle={`${PROJECT.project_name} — ${PROJECT.quarter} Report`} />
+      <Header subtitle={`${PROJECT.project_name} — ${PROJECT.report_period} Report`} />
 
       {/* Tab Navigation */}
       <div style={styles.tabBar as React.CSSProperties}>
@@ -583,7 +583,7 @@ export default function DIReportEngine() {
             <div className="print-page" style={styles.reportPage as React.CSSProperties}>
               <div style={{ padding: "80px 0", textAlign: "center" }}>
                 <h1 style={{ fontSize: 36, fontWeight: 900, color: "#0f172a", marginBottom: 24, textTransform: "uppercase" }}>
-                  Quarterly Compliance Report
+                  Compliance Report Data
                 </h1>
                 <h2 style={{ fontSize: 24, fontWeight: 700, color: "#334155", marginBottom: 8 }}>
                   {PROJECT.project_name}
@@ -592,7 +592,7 @@ export default function DIReportEngine() {
                   Project No. {PROJECT.project_no} — Contractor: {PROJECT.contractor}
                 </h3>
                 <div style={{ display: "inline-block", padding: "12px 24px", background: "#f1f5f9", borderRadius: 8, border: "2px solid #e2e8f0" }}>
-                  <p style={{ fontSize: 22, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.quarter}</p>
+                  <p style={{ fontSize: 22, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.report_period}</p>
                   <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 600 }}>As of {PROJECT.report_date}</p>
                 </div>
               </div>
@@ -603,7 +603,7 @@ export default function DIReportEngine() {
               <div style={styles.reportSection as React.CSSProperties}>
                 <h3 style={styles.reportSectionTitle as React.CSSProperties}>1. Executive Summary</h3>
                 <p style={styles.reportText as React.CSSProperties}>
-                  This report provides a comprehensive overview of the MWBE and SDVOB utilization and EEO workforce compliance for the <strong>{PROJECT.project_name}</strong> project during the <strong>{PROJECT.quarter}</strong> reporting period up to <strong>{PROJECT.report_date}</strong>.
+                  This report provides a comprehensive overview of the MWBE and SDVOB utilization and EEO workforce compliance for the <strong>{PROJECT.project_name}</strong> project during the <strong>{PROJECT.report_period}</strong> reporting period up to <strong>{PROJECT.report_date}</strong>.
                 </p>
 
                 {isProject2 ? (
@@ -622,7 +622,7 @@ export default function DIReportEngine() {
                 <p style={styles.reportText as React.CSSProperties}>
                   To increase participation of MWBE/SDVOB firms in the project, rigorous outreach was provided during the bidding phase. We utilize a variety of methods to engage the community including informational e-blasts, social media outreach, partnering with local chambers and civic organizations, and coordinating information sessions.
                   <br /><br />
-                  *Note: Specific outreach events for this quarter are logged in the project communications ledger.*
+                  *Note: Specific outreach events for this reporting period are logged in the project communications ledger.*
                 </p>
               </div>
             </div>
@@ -783,7 +783,7 @@ export default function DIReportEngine() {
       {/* Back to Upload */}
       <div style={{ textAlign: "center", padding: "24px 0 40px" }}>
         <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
-          ← Upload New Quarter
+          ← Upload New Report Data
         </button>
       </div>
     </div>
