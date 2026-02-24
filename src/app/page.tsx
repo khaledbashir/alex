@@ -117,7 +117,7 @@ export default function DIReportEngine() {
           >
             <input ref={fileRef} type="file" style={{ display: "none" }} onChange={handleFileUpload} />
             <div style={styles.uploadIcon as React.CSSProperties}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="12" y1="18" x2="12" y2="12" />
@@ -235,8 +235,8 @@ export default function DIReportEngine() {
     { group: "Unknown", count: totalUnknown, pct: totalHeadcount ? (totalUnknown / totalHeadcount) * 100 : 0 },
   ].filter(d => d.count > 0);
 
-  const COLORS: Record<string, string> = { MBE: "#6366f1", WBE: "#ec4899", SDVOB: "#f59e0b", "Non-MWBE": "#64748b" };
-  const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#14b8a6", "#f59e0b", "#94a3b8"];
+  const COLORS: Record<string, string> = { MBE: "#dc2626", WBE: "#ec4899", SDVOB: "#f59e0b", "Non-MWBE": "#64748b" };
+  const PIE_COLORS = ["#3b82f6", "#334155", "#ec4899", "#14b8a6", "#f59e0b", "#94a3b8"];
 
   const totalDiversity = ["MBE", "WBE", "SDVOB"].reduce((a, c) => a + (cats[c]?.contract || 0), 0);
 
@@ -267,7 +267,7 @@ export default function DIReportEngine() {
               {isProject2 ? (
                 // Project 2 KPIs
                 [
-                  { label: "Total Contract Value", value: fmt(p2TotalContract), accent: "#6366f1" },
+                  { label: "Total Contract Value", value: fmt(p2TotalContract), accent: "#dc2626" },
                   { label: "Towards Goal", value: fmt(p2TotalTowardsGoal), accent: "#22c55e" },
                   { label: "Total Paid to Date", value: fmt(p2TotalPaid), accent: "#ec4899" },
                   { label: "Total EEO Headcount", value: p2TotalHeadcount.toString(), accent: "#f59e0b" },
@@ -281,7 +281,7 @@ export default function DIReportEngine() {
               ) : (
                 // Project 1 KPIs
                 [
-                  { label: "Total Contract Value", value: fmt(PROJECT.total_contract_value), accent: "#6366f1" },
+                  { label: "Total Contract Value", value: fmt(PROJECT.total_contract_value), accent: "#dc2626" },
                   { label: "MWBE/SDVOB Utilization", value: fmt(totalDiversity), accent: "#22c55e" },
                   { label: "Utilization %", value: pct(totalDiversity / PROJECT.total_contract_value), accent: "#ec4899" },
                   { label: "Firms", value: SUBCONTRACTORS.length.toString(), accent: "#f59e0b" },
@@ -435,8 +435,8 @@ export default function DIReportEngine() {
               <>
                 <div style={styles.kpiGrid as React.CSSProperties}>
                   {[
-                    { label: "Total EEO Headcount", value: p2TotalHeadcount.toLocaleString(), accent: "#6366f1" },
-                    { label: "Total Hours Worked", value: p2TotalHours.toLocaleString(), accent: "#8b5cf6" },
+                    { label: "Total EEO Headcount", value: p2TotalHeadcount.toLocaleString(), accent: "#dc2626" },
+                    { label: "Total Hours Worked", value: p2TotalHours.toLocaleString(), accent: "#334155" },
                     { label: "Firms Reporting", value: [...new Set(P2_EEO.map(r => r.company))].length.toString(), accent: "#ec4899" },
                     { label: "Total Gross Wages", value: fmt(P2_EEO.reduce((s, r) => s + r.gross_wages, 0)), accent: "#3b82f6" },
                   ].map((kpi, i) => (
@@ -502,8 +502,8 @@ export default function DIReportEngine() {
               <>
                 <div style={styles.kpiGrid as React.CSSProperties}>
                   {[
-                    { label: "Total EEO Headcount", value: totalHeadcount.toLocaleString(), accent: "#6366f1" },
-                    { label: "African American", value: `${totalBlack.toLocaleString()} (${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)})`, accent: "#8b5cf6" },
+                    { label: "Total EEO Headcount", value: totalHeadcount.toLocaleString(), accent: "#dc2626" },
+                    { label: "African American", value: `${totalBlack.toLocaleString()} (${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)})`, accent: "#334155" },
                     { label: "Hispanic", value: `${totalHispanic.toLocaleString()} (${pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)})`, accent: "#ec4899" },
                     { label: "Asian", value: `${totalAsian.toLocaleString()} (${pct(totalHeadcount ? totalAsian / totalHeadcount : 0)})`, accent: "#3b82f6" },
                   ].map((kpi, i) => (
@@ -548,7 +548,7 @@ export default function DIReportEngine() {
                               <YAxis stroke="#94a3b8" fontSize={10} width={30} />
                               <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 11 }} />
                               <Bar dataKey="asian" name="Asian" stackId="a" fill="#3b82f6" />
-                              <Bar dataKey="black" name="Black" stackId="a" fill="#8b5cf6" />
+                              <Bar dataKey="black" name="Black" stackId="a" fill="#334155" />
                               <Bar dataKey="hispanic" name="Hispanic" stackId="a" fill="#ec4899" />
                               <Bar dataKey="white" name="White" stackId="a" fill="#14b8a6" />
                               <Bar dataKey="pacific_islander" name="Pacific Isl." stackId="a" fill="#f59e0b" />
@@ -592,7 +592,7 @@ export default function DIReportEngine() {
                   Project No. {PROJECT.project_no} — Contractor: {PROJECT.contractor}
                 </h3>
                 <div style={{ display: "inline-block", padding: "12px 24px", background: "#f1f5f9", borderRadius: 8, border: "2px solid #e2e8f0" }}>
-                  <p style={{ fontSize: 22, fontWeight: 800, color: "#6366f1", margin: 0 }}>{PROJECT.quarter}</p>
+                  <p style={{ fontSize: 22, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.quarter}</p>
                   <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 600 }}>As of {PROJECT.report_date}</p>
                 </div>
               </div>
@@ -796,9 +796,10 @@ function Header({ subtitle }: { subtitle: string }) {
     <div style={styles.header as React.CSSProperties}>
       <div>
         <h1 style={styles.logo as React.CSSProperties}>
-          <span style={{ color: "#6366f1" }}>■</span> D&I Report Engine
+          <span style={{ color: "#dc2626", fontWeight: 900, letterSpacing: "4px" }}>D|A|C|K</span>
+          <span style={{ color: "#f8fafc", fontWeight: 400, marginLeft: 12, fontSize: 16, letterSpacing: "1px" }}>CONSULTING SOLUTIONS</span>
         </h1>
-        <p style={styles.subtitle as React.CSSProperties}>{subtitle}</p>
+        <p style={{ ...styles.subtitle, color: "#94a3b8", marginTop: 8 } as React.CSSProperties}>{subtitle}</p>
       </div>
     </div>
   );
@@ -864,7 +865,7 @@ const styles: Record<string, React.CSSProperties> = {
   processBtn: {
     marginLeft: "auto",
     padding: "10px 24px",
-    background: "#6366f1",
+    background: "#dc2626",
     color: "#fff",
     border: "none",
     borderRadius: 8,
@@ -886,7 +887,7 @@ const styles: Record<string, React.CSSProperties> = {
   // Processing
   processingContainer: { maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center" },
   progressOuter: { background: "#1e293b", borderRadius: 20, height: 8, overflow: "hidden" },
-  progressInner: { background: "linear-gradient(90deg, #6366f1, #a78bfa)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
+  progressInner: { background: "linear-gradient(90deg, #dc2626, #fca5a5)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
   progressPct: { fontSize: 36, fontWeight: 800, color: "#f8fafc", margin: "20px 0 32px" },
   stepList: { textAlign: "left" },
   stepItem: { padding: "8px 0", fontSize: 14, color: "#94a3b8", transition: "opacity 0.3s" },
@@ -910,7 +911,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: "2px solid transparent",
     transition: "all 0.2s",
   },
-  tabActive: { color: "#f8fafc", borderBottom: "2px solid #6366f1" },
+  tabActive: { color: "#f8fafc", borderBottom: "2px solid #dc2626" },
   content: { padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
 
   // KPIs
@@ -960,7 +961,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cellInput: {
     background: "#1e293b",
-    border: "1px solid #6366f1",
+    border: "1px solid #dc2626",
     borderRadius: 4,
     color: "#f8fafc",
     padding: "4px 8px",
@@ -985,18 +986,18 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingBottom: 20,
-    borderBottom: "3px solid #6366f1",
+    borderBottom: "3px solid #dc2626",
     marginBottom: 28,
   },
   reportSection: { marginBottom: 28 },
-  reportSectionTitle: { fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #6366f1", paddingLeft: 12 },
+  reportSectionTitle: { fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #dc2626", paddingLeft: 12 },
   reportText: { fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 },
   reportTable: { width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 12 },
   reportTh: { textAlign: "left", padding: "10px 12px", background: "#f1f5f9", borderBottom: "2px solid #e2e8f0", color: "#475569", fontWeight: 700, fontSize: 11, textTransform: "uppercase" },
   reportTd: { padding: "10px 12px", borderBottom: "1px solid #f1f5f9", color: "#334155" },
   exportBtn: {
     padding: "12px 28px",
-    background: "#6366f1",
+    background: "#dc2626",
     color: "#fff",
     border: "none",
     borderRadius: 8,
