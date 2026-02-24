@@ -4,13 +4,27 @@ export interface Subcontractor {
     id: string;
     contract_number: string;
     date: string;
-    code: string; // e.g. MBE, WBE, SDVOB
+    code: string; // e.g. MBE, WBE, SDVOB, Non-MWBE
     name: string;
     federal_id: string;
     total_contract: number;
+    towards_goal: number;
     total_paid_to_date: number;
     total_paid_this_quarter: number;
     balance: number;
+    cert_received: boolean;
+    trade_designation?: string;
+}
+
+export interface WorkforceDemographic {
+    employer: string;
+    month: string;
+    asian: number;
+    black: number;
+    hispanic: number;
+    white: number;
+    pacific_islander: number;
+    unknown: number;
 }
 
 export interface ReportState {
@@ -25,21 +39,16 @@ export interface ReportState {
         SDVOB: number;
     };
     mwbe_sdvob_subcontractors_report: Subcontractor[];
-    workforce_tracking_ad_sheet: {
-        african_american: number;
-        hispanic: number;
-        women: number;
-    };
-    setReportData: (data: Partial<Omit<ReportState, 'setReportData' | 'updateSubcontractor'>>) => void;
+    workforce_demographics: WorkforceDemographic[];
+    setReportData: (data: Partial<Omit<ReportState, 'setReportData' | 'updateSubcontractor' | 'updateWorkforce'>>) => void;
     updateSubcontractor: (id: string, data: Partial<Subcontractor>) => void;
-    updateWorkforce: (data: Partial<ReportState['workforce_tracking_ad_sheet']>) => void;
 }
 
 export const useReportStore = create<ReportState>((set) => ({
     project_details: { project_no: '', project_name: '', contractor: '' },
     diversity_goals: { MBE: 0.15, WBE: 0.15, SDVOB: 0.06 },
     mwbe_sdvob_subcontractors_report: [],
-    workforce_tracking_ad_sheet: { african_american: 0, hispanic: 0, women: 0 },
+    workforce_demographics: [],
 
     setReportData: (data) => set((state) => ({ ...state, ...data })),
 
@@ -49,9 +58,4 @@ export const useReportStore = create<ReportState>((set) => ({
                 sub.id === id ? { ...sub, ...data } : sub
             ),
         })),
-
-    updateWorkforce: (data) =>
-        set((state) => ({
-            workforce_tracking_ad_sheet: { ...state.workforce_tracking_ad_sheet, ...data }
-        }))
 }));

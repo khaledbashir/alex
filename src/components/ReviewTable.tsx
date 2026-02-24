@@ -22,7 +22,26 @@ export default function ReviewTable() {
         },
         {
             accessorKey: 'code',
-            header: 'Code (MBE/WBE)',
+            header: 'Code',
+        },
+        {
+            accessorKey: 'trade_designation',
+            header: 'Trade Designation',
+        },
+        {
+            accessorKey: 'cert_received',
+            header: 'Cert Rec\'d',
+            cell: ({ row, getValue }) => {
+                const checked = getValue() as boolean;
+                return (
+                    <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => updateSubcontractor(row.original.id, { cert_received: e.target.checked })}
+                        className="w-5 h-5 cursor-pointer accent-primary"
+                    />
+                );
+            }
         },
         {
             accessorKey: 'total_contract',
@@ -34,7 +53,22 @@ export default function ReviewTable() {
                         type="number"
                         value={value}
                         onChange={(e) => updateSubcontractor(row.original.id, { total_contract: Number(e.target.value) })}
-                        className="w-32 bg-background border-muted"
+                        className="w-28 bg-background border-muted"
+                    />
+                );
+            }
+        },
+        {
+            accessorKey: 'towards_goal',
+            header: 'Towards Goal',
+            cell: ({ row, getValue }) => {
+                const value = getValue() as number;
+                return (
+                    <Input
+                        type="number"
+                        value={value}
+                        onChange={(e) => updateSubcontractor(row.original.id, { towards_goal: Number(e.target.value) })}
+                        className="w-28 bg-background border-muted"
                     />
                 );
             }
@@ -49,7 +83,7 @@ export default function ReviewTable() {
                         type="number"
                         value={value}
                         onChange={(e) => updateSubcontractor(row.original.id, { total_paid_to_date: Number(e.target.value) })}
-                        className="w-32 bg-background border-muted"
+                        className="w-28 bg-background border-muted"
                     />
                 );
             }
@@ -64,7 +98,7 @@ export default function ReviewTable() {
                         type="number"
                         value={value}
                         onChange={(e) => updateSubcontractor(row.original.id, { total_paid_this_quarter: Number(e.target.value) })}
-                        className="w-32 bg-background border-muted"
+                        className="w-28 bg-background border-muted"
                     />
                 );
             }
@@ -79,7 +113,7 @@ export default function ReviewTable() {
                         type="number"
                         value={value}
                         onChange={(e) => updateSubcontractor(row.original.id, { balance: Number(e.target.value) })}
-                        className="w-32 bg-background border-muted"
+                        className="w-28 bg-background border-muted"
                     />
                 );
             }
@@ -95,14 +129,14 @@ export default function ReviewTable() {
     if (subcontractors.length === 0) return null;
 
     return (
-        <div className="rounded-md border bg-card">
+        <div className="rounded-md border bg-card overflow-x-auto">
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => {
                                 return (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className="whitespace-nowrap">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -123,7 +157,7 @@ export default function ReviewTable() {
                                 data-state={row.getIsSelected() && "selected"}
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
+                                    <TableCell key={cell.id} className="whitespace-nowrap p-2">
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </TableCell>
                                 ))}

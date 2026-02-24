@@ -3,51 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-// ── Synthetic Data matching Natalia's actual schema ──
-const PROJECT = {
-  project_no: "161026-04",
-  project_name: "RENOVATE PLANT SCIENCE BUILDING",
-  contractor: "LeChase Construction Services, LLC",
-  quarter: "Q4 2025",
-  report_date: "December 31, 2025",
-  total_contract_value: 48750000,
-};
-
-const DIVERSITY_GOALS: Record<string, number> = { MBE: 0.15, WBE: 0.15, SDVOB: 0.06 };
-
-const SUBCONTRACTORS = [
-  { contract_number: "SC-2024-001", date: "03/15/2024", code: "MBE", name: "Apex Mechanical Systems Inc.", federal_id: "**-***7842", total_contract: 3250000, total_paid_to_date: 2847500, total_paid_this_quarter: 487500 },
-  { contract_number: "SC-2024-002", date: "03/22/2024", code: "MBE", name: "Rivera Electric Corp.", federal_id: "**-***3291", total_contract: 2100000, total_paid_to_date: 1680000, total_paid_this_quarter: 315000 },
-  { contract_number: "SC-2024-003", date: "04/01/2024", code: "WBE", name: "Sterling Plumbing & HVAC LLC", federal_id: "**-***5518", total_contract: 2875000, total_paid_to_date: 2300000, total_paid_this_quarter: 431250 },
-  { contract_number: "SC-2024-004", date: "04/10/2024", code: "WBE", name: "Greenfield Interiors Group", federal_id: "**-***8834", total_contract: 1950000, total_paid_to_date: 1462500, total_paid_this_quarter: 292500 },
-  { contract_number: "SC-2024-005", date: "04/15/2024", code: "SDVOB", name: "Patriot Fire Protection Inc.", federal_id: "**-***2207", total_contract: 1625000, total_paid_to_date: 1218750, total_paid_this_quarter: 243750 },
-  { contract_number: "SC-2024-006", date: "05/01/2024", code: "MBE", name: "Kwame Structural Engineering", federal_id: "**-***6673", total_contract: 1800000, total_paid_to_date: 1260000, total_paid_this_quarter: 270000 },
-  { contract_number: "SC-2024-007", date: "05/12/2024", code: "WBE", name: "Dawson Painting & Restoration", federal_id: "**-***1149", total_contract: 980000, total_paid_to_date: 735000, total_paid_this_quarter: 147000 },
-  { contract_number: "SC-2024-008", date: "06/01/2024", code: "SDVOB", name: "VetBuild Demolition Services", federal_id: "**-***4456", total_contract: 1300000, total_paid_to_date: 910000, total_paid_this_quarter: 195000 },
-];
-
-const WORKFORCE = {
-  total_hours: 124500,
-  african_american: { hours: 18675, pct: 0.15 },
-  hispanic: { hours: 14940, pct: 0.12 },
-  women: { hours: 8715, pct: 0.07 },
-  other_minority: { hours: 6225, pct: 0.05 },
-};
+import { parseMWBEExcel } from '@/lib/excelParser';
+import { useReportStore } from '@/store/reportStore';
+import ReviewTable from '@/components/ReviewTable';
 
 // ── Helpers ──
 const fmt = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
-function getCategoryTotals() {
-  const cats: Record<string, { contract: number; paid: number; count: number }> = {};
-  SUBCONTRACTORS.forEach((s) => {
-    if (!cats[s.code]) cats[s.code] = { contract: 0, paid: 0, count: 0 };
-    cats[s.code].contract += s.total_contract;
-    cats[s.code].paid += s.total_paid_to_date;
-    cats[s.code].count += 1;
-  });
-  return cats;
-}
 
 // ── Animations ──
 const fadeUp = (delay: number = 0): React.CSSProperties => ({
@@ -61,38 +24,72 @@ export default function DIReportEngine() {
   const [screen, setScreen] = useState("upload"); // upload | processing | dashboard | report
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
-  const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
-  const [tableData, setTableData] = useState<any[]>(SUBCONTRACTORS);
   const [activeTab, setActiveTab] = useState("overview");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const {
+    project_details,
+    diversity_goals,
+    mwbe_sdvob_subcontractors_report: SUBCONTRACTORS,
+    workforce_demographics: WORKFORCE,
+    setReportData
+  } = useReportStore();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    e.preventDefault();
+    let file: File | null = null;
+    if ('dataTransfer' in e && e.dataTransfer?.files.length) file = e.dataTransfer.files[0];
+    else if ('target' in e && (e.target as HTMLInputElement).files?.length) file = (e.target as HTMLInputElement).files![0];
+
+    if (file) {
+      setUploadedFile(file.name);
+      setScreen("processing");
+      try {
+        const data = await parseMWBEExcel(file);
+        setReportData(data);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to parse Excel file.");
+      }
+    }
+  };
+
   // Simulated processing
   useEffect(() => {
-    if (screen === "processing") {
+    if (screen === "processing" && uploadedFile) {
       const steps = [
-        { p: 15, t: 400 }, { p: 35, t: 800 }, { p: 55, t: 1200 },
-        { p: 75, t: 1600 }, { p: 90, t: 2000 }, { p: 100, t: 2400 },
+        { p: 15, t: 300 }, { p: 35, t: 600 }, { p: 65, t: 1000 },
+        { p: 85, t: 1500 }, { p: 100, t: 2000 },
       ];
       steps.forEach(({ p, t }) => setTimeout(() => setProgress(p), t));
-      setTimeout(() => setScreen("dashboard"), 3000);
+      setTimeout(() => setScreen("dashboard"), 2200);
     }
-  }, [screen]);
+  }, [screen, uploadedFile]);
 
-  const catTotals = getCategoryTotals();
+  // Derived Category Totals
+  const catTotals: Record<string, { contract: number; paid: number; count: number }> = {};
+  SUBCONTRACTORS.forEach((s) => {
+    const code = s.code === 'Non-M/WBE' ? 'Non-MWBE' : s.code;
+    if (!cats[code]) cats[code] = { contract: 0, paid: 0, count: 0 };
+    cats[code].contract += (s.towards_goal || s.total_contract);
+    cats[code].paid += s.total_paid_to_date;
+    cats[code].count += 1;
+  });
+  const cats = catTotals;
 
   // ── UPLOAD SCREEN ──
   if (screen === "upload") {
     return (
       <div style={styles.app as React.CSSProperties}>
         <style>{keyframes}</style>
-        <Header subtitle="Diversity & Inclusion Compliance Report Engine" />
+        <Header subtitle="MWBE/SDVOB Utilization & EEO Compliance Report Engine" />
         <div style={styles.uploadContainer as React.CSSProperties}>
           <div style={{ ...styles.uploadZone, ...fadeUp(0.1) } as React.CSSProperties}
             onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => { e.preventDefault(); setUploadedFile("Q4_2025_Raw_Data.xlsx"); }}
+            onDrop={handleFileUpload}
             onClick={() => fileRef.current?.click()}
           >
-            <input ref={fileRef} type="file" style={{ display: "none" }} onChange={() => setUploadedFile("Q4_2025_Raw_Data.xlsx")} />
+            <input ref={fileRef} type="file" style={{ display: "none" }} onChange={handleFileUpload} />
             <div style={styles.uploadIcon as React.CSSProperties}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -176,30 +173,44 @@ export default function DIReportEngine() {
   }
 
   // ── DASHBOARD / REPORT SCREEN ──
-  const goalData = Object.entries(DIVERSITY_GOALS).map(([code, goal]) => ({
+  const PROJECT = { ...project_details, quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: 48750000 };
+
+  const goalData = Object.entries(diversity_goals).map(([code, goal]) => ({
     code,
     goal: goal * 100,
-    actual: ((catTotals[code]?.contract || 0) / PROJECT.total_contract_value) * 100,
+    actual: ((cats[code]?.contract || 0) / PROJECT.total_contract_value) * 100,
   }));
 
-  const paymentData = Object.entries(catTotals).map(([code, d]) => ({
+  const paymentData = Object.entries(cats).map(([code, d]) => ({
     code,
     contracted: d.contract,
     paid: d.paid,
     balance: d.contract - d.paid,
-  }));
+  })).filter(d => d.contracted > 0);
+
+  // Workforce stats calculation
+  const totalAsian = WORKFORCE.reduce((sum, d) => sum + d.asian, 0);
+  const totalBlack = WORKFORCE.reduce((sum, d) => sum + d.black, 0);
+  const totalHispanic = WORKFORCE.reduce((sum, d) => sum + d.hispanic, 0);
+  const totalWhite = WORKFORCE.reduce((sum, d) => sum + d.white, 0);
+  const totalPacific = WORKFORCE.reduce((sum, d) => sum + d.pacific_islander, 0);
+  const totalUnknown = WORKFORCE.reduce((sum, d) => sum + d.unknown, 0);
+
+  const totalHeadcount = totalAsian + totalBlack + totalHispanic + totalWhite + totalPacific + totalUnknown;
 
   const workforceData = [
-    { group: "African American", hours: WORKFORCE.african_american.hours, pct: WORKFORCE.african_american.pct * 100 },
-    { group: "Hispanic", hours: WORKFORCE.hispanic.hours, pct: WORKFORCE.hispanic.pct * 100 },
-    { group: "Women", hours: WORKFORCE.women.hours, pct: WORKFORCE.women.pct * 100 },
-    { group: "Other Minority", hours: WORKFORCE.other_minority.hours, pct: WORKFORCE.other_minority.pct * 100 },
-  ];
+    { group: "Asian", count: totalAsian, pct: totalHeadcount ? (totalAsian / totalHeadcount) * 100 : 0 },
+    { group: "Black", count: totalBlack, pct: totalHeadcount ? (totalBlack / totalHeadcount) * 100 : 0 },
+    { group: "Hispanic", count: totalHispanic, pct: totalHeadcount ? (totalHispanic / totalHeadcount) * 100 : 0 },
+    { group: "White", count: totalWhite, pct: totalHeadcount ? (totalWhite / totalHeadcount) * 100 : 0 },
+    { group: "Pacific Isl.", count: totalPacific, pct: totalHeadcount ? (totalPacific / totalHeadcount) * 100 : 0 },
+    { group: "Unknown", count: totalUnknown, pct: totalHeadcount ? (totalUnknown / totalHeadcount) * 100 : 0 },
+  ].filter(d => d.count > 0);
 
-  const COLORS: Record<string, string> = { MBE: "#6366f1", WBE: "#ec4899", SDVOB: "#f59e0b" };
-  const PIE_COLORS = ["#6366f1", "#ec4899", "#f59e0b", "#22c55e"];
+  const COLORS: Record<string, string> = { MBE: "#6366f1", WBE: "#ec4899", SDVOB: "#f59e0b", "Non-MWBE": "#64748b" };
+  const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#14b8a6", "#f59e0b", "#94a3b8"];
 
-  const totalDiversity = Object.values(catTotals).reduce((a, c) => a + c.contract, 0);
+  const totalDiversity = ["MBE", "WBE", "SDVOB"].reduce((a, c) => a + (cats[c]?.contract || 0), 0);
 
   return (
     <div style={styles.app as React.CSSProperties}>
@@ -214,7 +225,7 @@ export default function DIReportEngine() {
             style={{ ...styles.tab, ...(activeTab === tab ? styles.tabActive : {}) } as React.CSSProperties}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === "overview" ? "📊 Overview" : tab === "subcontractors" ? "📋 Subcontractors" : tab === "workforce" ? "👷 Workforce" : "📄 Report Preview"}
+            {tab === "overview" ? "📊 Overview" : tab === "subcontractors" ? "📋 Utilization & Compliance" : tab === "workforce" ? "👷 EEO Compliance" : "📄 Report Preview"}
           </button>
         ))}
       </div>
@@ -227,9 +238,9 @@ export default function DIReportEngine() {
             <div style={styles.kpiGrid as React.CSSProperties}>
               {[
                 { label: "Total Contract Value", value: fmt(PROJECT.total_contract_value), accent: "#6366f1" },
-                { label: "MWBE/SDVOB Allocated", value: fmt(totalDiversity), accent: "#22c55e" },
-                { label: "Diversity %", value: pct(totalDiversity / PROJECT.total_contract_value), accent: "#ec4899" },
-                { label: "Subcontractors", value: SUBCONTRACTORS.length.toString(), accent: "#f59e0b" },
+                { label: "MWBE/SDVOB Utilization", value: fmt(totalDiversity), accent: "#22c55e" },
+                { label: "Utilization %", value: pct(totalDiversity / PROJECT.total_contract_value), accent: "#ec4899" },
+                { label: "Firms", value: SUBCONTRACTORS.length.toString(), accent: "#f59e0b" },
               ].map((kpi, i) => (
                 <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
                   <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
@@ -314,79 +325,18 @@ export default function DIReportEngine() {
 
         {/* ── SUBCONTRACTORS TAB ── */}
         {activeTab === "subcontractors" && (
-          <div style={{ ...styles.chartCard, ...fadeUp(0.1), overflow: "auto" } as React.CSSProperties}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <p style={styles.chartTitle as React.CSSProperties}>MWBE/SDVOB Subcontractors — Click any cell to edit</p>
+          <div style={{ ...styles.chartCard, ...fadeUp(0.1), overflow: "auto", padding: 0 } as React.CSSProperties}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 20px 16px" }}>
+              <p style={styles.chartTitle as React.CSSProperties}>MWBE/SDVOB Utilization</p>
               <div style={{ display: "flex", gap: 8 }}>
                 {Object.entries(COLORS).map(([code, color]) => (
                   <span key={code} style={{ background: `${color}22`, color, padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
-                    {code}: {catTotals[code]?.count || 0} firms
+                    {code}: {cats[code]?.count || 0} firms
                   </span>
                 ))}
               </div>
             </div>
-            <table style={styles.table as React.CSSProperties}>
-              <thead>
-                <tr>
-                  {["Contract #", "Date", "Code", "Company Name", "Federal ID", "Total Contract", "Paid to Date", "Paid This Quarter", "Balance"].map((h) => (
-                    <th key={h} style={styles.th as React.CSSProperties}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, ri) => (
-                  <tr key={ri} style={{ background: ri % 2 === 0 ? "transparent" : "#0f172a08" }}>
-                    {Object.entries(row).map(([key, val], ci) => {
-                      const isEditing = editingCell?.row === ri && editingCell?.col === ci;
-                      const isMoney = ["total_contract", "total_paid_to_date", "total_paid_this_quarter"].includes(key);
-                      const isCode = key === "code";
-                      return (
-                        <td
-                          key={ci}
-                          style={{
-                            ...styles.td,
-                            ...(isCode && typeof val === 'string' ? { color: COLORS[val] || "#e2e8f0", fontWeight: 700 } : {}),
-                          } as React.CSSProperties}
-                          onClick={() => setEditingCell({ row: ri, col: ci })}
-                        >
-                          {isEditing ? (
-                            <input
-                              autoFocus
-                              style={styles.cellInput as React.CSSProperties}
-                              defaultValue={val as string | number}
-                              onBlur={(e) => {
-                                const newData = [...tableData];
-                                newData[ri] = { ...newData[ri], [key]: isMoney ? Number(e.target.value) : e.target.value };
-                                // recalc balance
-                                newData[ri].balance = newData[ri].total_contract - newData[ri].total_paid_to_date;
-                                setTableData(newData);
-                                setEditingCell(null);
-                              }}
-                              onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                            />
-                          ) : key === "balance" ? (
-                            fmt(row.total_contract - row.total_paid_to_date)
-                          ) : isMoney ? (
-                            fmt(val as number)
-                          ) : (
-                            val as React.ReactNode
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan={5} style={{ ...styles.td, fontWeight: 700, color: "#e2e8f0" } as React.CSSProperties}>TOTALS</td>
-                  <td style={{ ...styles.td, fontWeight: 700, color: "#22c55e" } as React.CSSProperties}>{fmt(tableData.reduce((a, r) => a + r.total_contract, 0))}</td>
-                  <td style={{ ...styles.td, fontWeight: 700, color: "#22c55e" } as React.CSSProperties}>{fmt(tableData.reduce((a, r) => a + r.total_paid_to_date, 0))}</td>
-                  <td style={{ ...styles.td, fontWeight: 700, color: "#22c55e" } as React.CSSProperties}>{fmt(tableData.reduce((a, r) => a + r.total_paid_this_quarter, 0))}</td>
-                  <td style={{ ...styles.td, fontWeight: 700, color: "#f59e0b" } as React.CSSProperties}>{fmt(tableData.reduce((a, r) => a + (r.total_contract - r.total_paid_to_date), 0))}</td>
-                </tr>
-              </tfoot>
-            </table>
+            <ReviewTable />
           </div>
         )}
 
@@ -395,10 +345,10 @@ export default function DIReportEngine() {
           <>
             <div style={styles.kpiGrid as React.CSSProperties}>
               {[
-                { label: "Total Workforce Hours", value: WORKFORCE.total_hours.toLocaleString(), accent: "#6366f1" },
-                { label: "African American", value: `${WORKFORCE.african_american.hours.toLocaleString()} hrs (${pct(WORKFORCE.african_american.pct)})`, accent: "#6366f1" },
-                { label: "Hispanic", value: `${WORKFORCE.hispanic.hours.toLocaleString()} hrs (${pct(WORKFORCE.hispanic.pct)})`, accent: "#ec4899" },
-                { label: "Women", value: `${WORKFORCE.women.hours.toLocaleString()} hrs (${pct(WORKFORCE.women.pct)})`, accent: "#f59e0b" },
+                { label: "Total EEO Headcount", value: totalHeadcount.toLocaleString(), accent: "#6366f1" },
+                { label: "African American", value: `${totalBlack.toLocaleString()} (${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)})`, accent: "#8b5cf6" },
+                { label: "Hispanic", value: `${totalHispanic.toLocaleString()} (${pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)})`, accent: "#ec4899" },
+                { label: "Asian", value: `${totalAsian.toLocaleString()} (${pct(totalHeadcount ? totalAsian / totalHeadcount : 0)})`, accent: "#3b82f6" },
               ].map((kpi, i) => (
                 <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
                   <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
@@ -407,24 +357,51 @@ export default function DIReportEngine() {
                 </div>
               ))}
             </div>
+
             <div style={{ ...styles.chartCard, ...fadeUp(0.2) } as React.CSSProperties}>
-              <p style={styles.chartTitle as React.CSSProperties}>Workforce Hours by Demographic</p>
+              <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Group</p>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={workforceData} barCategoryGap="25%">
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                   <XAxis dataKey="group" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <YAxis stroke="#94a3b8" fontSize={12} />
                   <Tooltip
                     contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
-                    formatter={(v: any) => [`${v.toLocaleString()} hours`]}
+                    formatter={(v: any) => [`${v.toLocaleString()} workers`]}
                   />
-                  <Bar dataKey="hours" name="Hours" radius={[6, 6, 0, 0]}>
+                  <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
                     {workforceData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i]} />
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            <div style={{ ...styles.chartCard, ...fadeUp(0.3) } as React.CSSProperties}>
+              <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Employer</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                {WORKFORCE.map((emp, i) => (
+                  <div key={i} style={{ background: '#0d1323', padding: 16, borderRadius: 8, border: '1px solid #1e293b' }}>
+                    <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.employer}</p>
+                    <div style={{ height: 180 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={[emp]} barCategoryGap="25%">
+                          <XAxis dataKey="month" hide />
+                          <YAxis stroke="#94a3b8" fontSize={10} width={30} />
+                          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 11 }} />
+                          <Bar dataKey="asian" name="Asian" stackId="a" fill="#3b82f6" />
+                          <Bar dataKey="black" name="Black" stackId="a" fill="#8b5cf6" />
+                          <Bar dataKey="hispanic" name="Hispanic" stackId="a" fill="#ec4899" />
+                          <Bar dataKey="white" name="White" stackId="a" fill="#14b8a6" />
+                          <Bar dataKey="pacific_islander" name="Pacific Isl." stackId="a" fill="#f59e0b" />
+                          <Bar dataKey="unknown" name="Unknown" stackId="a" fill="#94a3b8" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}
@@ -456,7 +433,7 @@ export default function DIReportEngine() {
               </div>
 
               <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Diversity Goal Attainment</h3>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Utilization Goal Attainment</h3>
                 <table style={styles.reportTable as React.CSSProperties}>
                   <thead>
                     <tr>
@@ -468,15 +445,15 @@ export default function DIReportEngine() {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(DIVERSITY_GOALS).map(([code, goal]) => {
-                      const actual = (catTotals[code]?.contract || 0) / PROJECT.total_contract_value;
+                    {Object.entries(diversity_goals).map(([code, goal]) => {
+                      const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
                       const met = actual >= goal;
                       return (
                         <tr key={code}>
                           <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
                           <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
                           <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{fmt(catTotals[code]?.contract || 0)}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
                           <td style={styles.reportTd as React.CSSProperties}>
                             <span style={{ background: met ? "#dcfce7" : "#fef2f2", color: met ? "#16a34a" : "#dc2626", padding: "2px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600 }}>
                               {met ? "✓ Met" : "✗ Below"}
@@ -490,11 +467,11 @@ export default function DIReportEngine() {
               </div>
 
               <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. Workforce Utilization</h3>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. EEO Workforce Utilization</h3>
                 <p style={styles.reportText as React.CSSProperties}>
-                  Total workforce hours logged this reporting period: <strong>{WORKFORCE.total_hours.toLocaleString()} hours</strong>.
-                  Diverse workforce participation includes African American workers at {pct(WORKFORCE.african_american.pct)},
-                  Hispanic workers at {pct(WORKFORCE.hispanic.pct)}, and women at {pct(WORKFORCE.women.pct)} of total hours.
+                  Total EEO headcount logged this reporting period is <strong>{totalHeadcount.toLocaleString()} workers</strong>.
+                  Diverse workforce participation includes African American workers at {pct(totalHeadcount ? totalBlack / totalHeadcount : 0)},
+                  Hispanic workers at {pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)}, and Asian workers at {pct(totalHeadcount ? totalAsian / totalHeadcount : 0)} of total headcount.
                 </p>
               </div>
 

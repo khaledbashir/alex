@@ -1,86 +1,99 @@
 import ExcelJS from 'exceljs';
-import { Subcontractor, ReportState } from '@/store/reportStore';
+import { Subcontractor, ReportState, WorkforceDemographic } from '@/store/reportStore';
 
-export async function parseMWBEExcel(file: File): Promise<Omit<ReportState, 'setReportData' | 'updateSubcontractor' | 'updateWorkforce'>> {
+export async function parseMWBEExcel(file: File): Promise<Omit<ReportState, 'setReportData' | 'updateSubcontractor'>> {
     const workbook = new ExcelJS.Workbook();
     const arrayBuffer = await file.arrayBuffer();
     await workbook.xlsx.load(arrayBuffer);
 
-    const sheet = workbook.worksheets[0]; // Assuming data is in the first sheet
-    if (!sheet) {
-        throw new Error('No worksheets found in the uploaded file.');
-    }
+    const subsSheet = workbook.getWorksheet('Dec 2025 Payments Raw Data');
+    const workforceSheet = workbook.getWorksheet('For Q4 Report');
 
-    // Basic mock parsing - in a real scenario we'd extract specific cells.
-    // For the sake of matching the user's requested JSON output schema:
+    if (!subsSheet) throw new Error('Could not find "Dec 2025 Payments Raw Data" sheet');
+
     const subcontractors: Subcontractor[] = [];
 
-    let headerRowIndex = 1;
-    sheet.eachRow((row, rowNumber) => {
-        const rowValues = row.values as any[];
-        if (rowValues.some(val => typeof val === 'string' && val.toLowerCase().includes('name'))) {
-            headerRowIndex = rowNumber;
-        }
-    });
+    // Parse "Dec 2025 Payments Raw Data" starting from row 5
+    subsSheet.eachRow((row, rowNumber) => {
+        if (rowNumber < 5) return;
 
-    // Parse from headerRowIndex + 1 onwards
-    sheet.eachRow((row, rowNumber) => {
-        if (rowNumber <= headerRowIndex) return;
+        const name = row.getCell(5).text?.trim(); // Awarded Contractor
+        if (!name || name === 'TOTAL IN YELLOW' || name === 'Awarded Contractor') return;
 
-        // Mock parsing matching the JSON schema
-        const contract_number = row.getCell(1).text || `CN-${rowNumber}`;
-        const date = row.getCell(2).text || new Date().toISOString().split('T')[0];
-        const code = row.getCell(3).text || (rowNumber % 2 === 0 ? 'MBE' : 'WBE');
-        const name = row.getCell(4).text || `Subcontractor ${rowNumber}`;
-        const federal_id = row.getCell(5).text || `XX-XXXXXXX${rowNumber}`;
-        const total_contract = Number(row.getCell(6).value) || Math.floor(Math.random() * 500000);
-        const total_paid_to_date = Number(row.getCell(7).value) || Math.floor(total_contract * 0.5);
-        const total_paid_this_quarter = Number(row.getCell(8).value) || Math.floor(total_paid_to_date * 0.3);
-        const balance = total_contract - total_paid_to_date;
+        const tradeDesignation = row.getCell(6).text?.trim()?.toLowerCase() || ''; // Trade Designation
+        const code = row.getCell(8).text?.trim() || 'Non-M/WBE'; // Certification Status
+        const cert_received = !!row.getCell(27).value; // Certificate Re c'd is col 27 (often "Dec 2025\n1-15-26" etc.)
 
-        if (name && name !== `Subcontractor ${rowNumber}`) {
-            subcontractors.push({
-                id: `sub-${rowNumber}`,
-                contract_number,
-                date,
-                code,
-                name,
-                federal_id,
-                total_contract,
-                total_paid_to_date,
-                total_paid_this_quarter,
-                balance
-            });
-        }
-    });
+        // Grab contracts / payments safely by summing depending on MBE/WBE/SDVOB/Non-MWBE
+        // Usually, the values exist in the respective columns. Let's look across them or just take the max if organized weirdly.
+        const nonMwbeContract = Number(row.getCell(12).result ?? row.getCell(12).value) || 0;
+        const sdvobContract = Number(row.getCell(16).result ?? row.getCell(16).value) || 0;
+        const mbeContract = Number(row.getCell(20).result ?? row.getCell(20).value) || 0;
+        const wbeContract = Number(row.getCell(24).result ?? row.getCell(24).value) || 0;
 
-    // If we couldn't parse anything meaningful, return mock data reflecting the schema
-    if (subcontractors.length === 0) {
+        const total_contract = Math.max(nonMwbeContract, sdvobContract, mbeContract, wbeContract);
+
+        // Paid to date
+        const nonMwbePaid = Number(row.getCell(32).result ?? row.getCell(32).value) || 0;
+        const mbePaid = Number(row.getCell(33).result ?? row.getCell(33).value) || 0;
+        const wbePaid = Number(row.getCell(34).result ?? row.getCell(34).value) || 0;
+        // SDVOB paid isn't cleanly labeled but we'll assume total payment to date is accurate
+        const totalPaidToDate = Number(row.getCell(37).result ?? row.getCell(37).value) || 0;
+        const paidThisQuarter = Number(row.getCell(36).result ?? row.getCell(36).value) || 0;
+
+        // Towards Goal: 60% if it's just a supplier
+        const isSupplier = tradeDesignation.includes('supplier');
+        const towards_goal = isSupplier ? total_contract * 0.6 : total_contract;
+
         subcontractors.push({
-            id: 'sub-mock-1',
-            contract_number: 'CN-001',
-            date: '2026-02-23',
-            code: 'MBE',
-            name: 'Alpha Construction',
-            federal_id: '12-3456789',
-            total_contract: 1000000,
-            total_paid_to_date: 500000,
-            total_paid_this_quarter: 150000,
-            balance: 500000
+            id: `sub-${rowNumber}`,
+            contract_number: `BP-${rowNumber}`, // fallback as BP# often empty
+            date: new Date().toISOString().split('T')[0],
+            code,
+            name,
+            federal_id: 'N/A', // not present in raw data typically
+            total_contract,
+            towards_goal,
+            total_paid_to_date: totalPaidToDate,
+            total_paid_this_quarter: paidThisQuarter,
+            balance: total_contract - totalPaidToDate,
+            cert_received,
+            trade_designation: tradeDesignation
         });
-        subcontractors.push({
-            id: 'sub-mock-2',
-            contract_number: 'CN-002',
-            date: '2026-02-23',
-            code: 'WBE',
-            name: 'Omega Supplies',
-            federal_id: '98-7654321',
-            total_contract: 500000,
-            total_paid_to_date: 100000,
-            total_paid_this_quarter: 50000,
-            balance: 400000
+    });
+
+    // Parse "For Q4 Report" for Workforce demographics
+    const demographicsMap: Record<string, WorkforceDemographic> = {};
+    if (workforceSheet) {
+        workforceSheet.eachRow((row, rowNumber) => {
+            if (rowNumber < 9) return; // Data starts at row 9
+
+            const employer = row.getCell(4).text?.trim(); // Employer
+            if (!employer) return;
+
+            const dateText = row.getCell(1).text?.trim() || ""; // Date/Time often starts string
+            // Approximate month from date just to have it
+            let month = 'Q4 2025';
+
+            const ethnicity = row.getCell(7).text?.trim()?.toLowerCase() || 'unknown'; // Ethnicity
+
+            const key = `${employer}-${month}`;
+            if (!demographicsMap[key]) {
+                demographicsMap[key] = {
+                    employer, month, asian: 0, black: 0, hispanic: 0, white: 0, pacific_islander: 0, unknown: 0
+                };
+            }
+
+            if (ethnicity.includes('asian')) demographicsMap[key].asian++;
+            else if (ethnicity.includes('black')) demographicsMap[key].black++;
+            else if (ethnicity.includes('hispanic')) demographicsMap[key].hispanic++;
+            else if (ethnicity.includes('white')) demographicsMap[key].white++;
+            else if (ethnicity.includes('pacific')) demographicsMap[key].pacific_islander++;
+            else demographicsMap[key].unknown++;
         });
     }
+
+    const workforce_demographics = Object.values(demographicsMap);
 
     return {
         project_details: {
@@ -94,10 +107,6 @@ export async function parseMWBEExcel(file: File): Promise<Omit<ReportState, 'set
             SDVOB: 0.06
         },
         mwbe_sdvob_subcontractors_report: subcontractors,
-        workforce_tracking_ad_sheet: {
-            african_american: 1200,
-            hispanic: 800,
-            women: 600
-        }
+        workforce_demographics
     };
 }
