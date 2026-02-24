@@ -1,16 +1,35 @@
 import ExcelJS from 'exceljs';
 import { Subcontractor, ReportState, WorkforceDemographic } from '@/store/reportStore';
 
-export async function parseMWBEExcel(file: File): Promise<Omit<ReportState, 'setReportData' | 'updateSubcontractor'>> {
+export async function parseMWBEExcel(file: File): Promise<Partial<Omit<ReportState, 'setReportData' | 'updateSubcontractor' | 'updateWorkforce'>>> {
     const workbook = new ExcelJS.Workbook();
     const arrayBuffer = await file.arrayBuffer();
     await workbook.xlsx.load(arrayBuffer);
 
     const subsSheet = workbook.getWorksheet('Dec 2025 Payments Raw Data');
     const workforceSheet = workbook.getWorksheet('For Q4 Report');
+    const utilSheet = workbook.getWorksheet('Table 1');
+    const eeoDataSheet = workbook.getWorksheet('Data');
 
-    if (!subsSheet) throw new Error('Could not find "Dec 2025 Payments Raw Data" sheet');
+    // -- PROJECT 1 PARSER --
+    if (subsSheet) {
+        return parseProject1(subsSheet, workforceSheet);
+    }
 
+    // -- PROJECT 2 (Utilization) PARSER --
+    if (utilSheet) {
+        return parseProject2Utilization(utilSheet);
+    }
+
+    // -- PROJECT 2 (EEO Data) PARSER --
+    if (eeoDataSheet) {
+        return parseProject2EEO(eeoDataSheet);
+    }
+
+    throw new Error('Unrecognized Excel format. Could not find recognizable sheets (e.g. "Dec 2025 Payments Raw Data", "Table 1", or "Data").');
+}
+
+function parseProject1(subsSheet: ExcelJS.Worksheet, workforceSheet: ExcelJS.Worksheet | undefined) {
     const subcontractors: Subcontractor[] = [];
 
     // Parse "Dec 2025 Payments Raw Data" starting from row 5
@@ -109,4 +128,63 @@ export async function parseMWBEExcel(file: File): Promise<Omit<ReportState, 'set
         mwbe_sdvob_subcontractors_report: subcontractors,
         workforce_demographics
     };
+}
+
+function parseProject2Utilization(utilSheet: ExcelJS.Worksheet) {
+    const records: any[] = [];
+
+    utilSheet.eachRow((row, rowNumber) => {
+        if (rowNumber < 2) return; // Skip headers
+
+        const company = row.getCell(2).text?.trim();
+        if (!company) return;
+
+        const value = Number(row.getCell(3).result ?? row.getCell(3).value) || 0;
+        const paid_to_date = Number(row.getCell(4).result ?? row.getCell(4).value) || 0;
+        const pending_payment = Number(row.getCell(5).result ?? row.getCell(5).value) || 0;
+
+        records.push({
+            id: `p2-util-${rowNumber}`,
+            company,
+            value,
+            towards_goal: value, // Placeholder, no strict 60% rule visible here yet
+            paid_to_date,
+            pending_payment
+        });
+    });
+
+    return { project2_utilization: records };
+}
+
+function parseProject2EEO(dataSheet: ExcelJS.Worksheet) {
+    const records: any[] = [];
+
+    dataSheet.eachRow((row, rowNumber) => {
+        if (rowNumber < 2) return; // Skip headers
+
+        const company = row.getCell(2).text?.trim();
+        if (!company) return;
+
+        const year = row.getCell(3).value;
+        const quarter = row.getCell(5).text?.trim() || String(year);
+
+        const race_ethnicity = row.getCell(10).text?.trim() || 'Unknown';
+        const gender = row.getCell(11).text?.trim() || 'Unknown';
+        const num_employees = Number(row.getCell(12).value) || 0;
+        const hours_worked = Number(row.getCell(13).value) || 0;
+        const gross_wages = Number(row.getCell(14).value) || 0;
+
+        records.push({
+            id: `p2-eeo-${rowNumber}`,
+            company,
+            quarter,
+            race_ethnicity,
+            gender,
+            num_employees,
+            hours_worked,
+            gross_wages
+        });
+    });
+
+    return { project2_eeo_data: records };
 }

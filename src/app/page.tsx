@@ -32,8 +32,12 @@ export default function DIReportEngine() {
     diversity_goals,
     mwbe_sdvob_subcontractors_report: SUBCONTRACTORS,
     workforce_demographics: WORKFORCE,
+    project2_utilization: P2_UTIL,
+    project2_eeo_data: P2_EEO,
     setReportData
   } = useReportStore();
+
+  const isProject2 = P2_UTIL.length > 0 || P2_EEO.length > 0;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
     e.preventDefault();
@@ -66,16 +70,38 @@ export default function DIReportEngine() {
     }
   }, [screen, uploadedFile]);
 
-  // Derived Category Totals
+  // Derived Category Totals (Project 1)
   const catTotals: Record<string, { contract: number; paid: number; count: number }> = {};
   SUBCONTRACTORS.forEach((s) => {
     const code = s.code === 'Non-M/WBE' ? 'Non-MWBE' : s.code;
-    if (!cats[code]) cats[code] = { contract: 0, paid: 0, count: 0 };
-    cats[code].contract += (s.towards_goal || s.total_contract);
-    cats[code].paid += s.total_paid_to_date;
-    cats[code].count += 1;
+    if (!catTotals[code]) catTotals[code] = { contract: 0, paid: 0, count: 0 };
+    catTotals[code].contract += (s.towards_goal || s.total_contract);
+    catTotals[code].paid += s.total_paid_to_date;
+    catTotals[code].count += 1;
   });
   const cats = catTotals;
+
+  // Derived Totals (Project 2)
+  const p2TotalContract = P2_UTIL.reduce((sum, row) => sum + row.value, 0);
+  const p2TotalTowardsGoal = P2_UTIL.reduce((sum, row) => sum + row.towards_goal, 0);
+  const p2TotalPaid = P2_UTIL.reduce((sum, row) => sum + row.paid_to_date, 0);
+
+  const p2TotalHeadcount = P2_EEO.reduce((sum, row) => sum + row.num_employees, 0);
+  const p2TotalHours = P2_EEO.reduce((sum, row) => sum + row.hours_worked, 0);
+
+  // Group P2 Demographics by Ethnicity
+  const p2EthTotals: Record<string, number> = {};
+  P2_EEO.forEach(row => {
+    p2EthTotals[row.race_ethnicity] = (p2EthTotals[row.race_ethnicity] || 0) + row.num_employees;
+  });
+  const p2EthChartData = Object.entries(p2EthTotals).map(([eth, count]) => ({ eth, count })).filter(d => d.count > 0);
+
+  // Group P2 Demographics by Gender
+  const p2GenderTotals: Record<string, number> = {};
+  P2_EEO.forEach(row => {
+    p2GenderTotals[row.gender] = (p2GenderTotals[row.gender] || 0) + row.num_employees;
+  });
+  const p2GenderChartData = Object.entries(p2GenderTotals).map(([gender, count]) => ({ gender, count })).filter(d => d.count > 0);
 
   // ── UPLOAD SCREEN ──
   if (screen === "upload") {
@@ -173,7 +199,9 @@ export default function DIReportEngine() {
   }
 
   // ── DASHBOARD / REPORT SCREEN ──
-  const PROJECT = { ...project_details, quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: 48750000 };
+  const PROJECT = isProject2
+    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: p2TotalContract }
+    : { ...project_details, quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: 48750000 };
 
   const goalData = Object.entries(diversity_goals).map(([code, goal]) => ({
     code,
@@ -236,41 +264,70 @@ export default function DIReportEngine() {
           <>
             {/* KPI Cards */}
             <div style={styles.kpiGrid as React.CSSProperties}>
-              {[
-                { label: "Total Contract Value", value: fmt(PROJECT.total_contract_value), accent: "#6366f1" },
-                { label: "MWBE/SDVOB Utilization", value: fmt(totalDiversity), accent: "#22c55e" },
-                { label: "Utilization %", value: pct(totalDiversity / PROJECT.total_contract_value), accent: "#ec4899" },
-                { label: "Firms", value: SUBCONTRACTORS.length.toString(), accent: "#f59e0b" },
-              ].map((kpi, i) => (
-                <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
-                  <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
-                  <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
-                  <p style={styles.kpiValue as React.CSSProperties}>{kpi.value}</p>
-                </div>
-              ))}
+              {isProject2 ? (
+                // Project 2 KPIs
+                [
+                  { label: "Total Contract Value", value: fmt(p2TotalContract), accent: "#6366f1" },
+                  { label: "Towards Goal", value: fmt(p2TotalTowardsGoal), accent: "#22c55e" },
+                  { label: "Total Paid to Date", value: fmt(p2TotalPaid), accent: "#ec4899" },
+                  { label: "Total EEO Headcount", value: p2TotalHeadcount.toString(), accent: "#f59e0b" },
+                ].map((kpi, i) => (
+                  <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
+                    <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
+                    <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
+                    <p style={styles.kpiValue as React.CSSProperties}>{kpi.value}</p>
+                  </div>
+                ))
+              ) : (
+                // Project 1 KPIs
+                [
+                  { label: "Total Contract Value", value: fmt(PROJECT.total_contract_value), accent: "#6366f1" },
+                  { label: "MWBE/SDVOB Utilization", value: fmt(totalDiversity), accent: "#22c55e" },
+                  { label: "Utilization %", value: pct(totalDiversity / PROJECT.total_contract_value), accent: "#ec4899" },
+                  { label: "Firms", value: SUBCONTRACTORS.length.toString(), accent: "#f59e0b" },
+                ].map((kpi, i) => (
+                  <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
+                    <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
+                    <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
+                    <p style={styles.kpiValue as React.CSSProperties}>{kpi.value}</p>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Charts Row */}
             <div style={styles.chartGrid as React.CSSProperties}>
               <div style={{ ...styles.chartCard, ...fadeUp(0.2) } as React.CSSProperties}>
-                <p style={styles.chartTitle as React.CSSProperties}>Goal Attainment by Category</p>
+                <p style={styles.chartTitle as React.CSSProperties}>
+                  {isProject2 ? "EEO Headcount by Ethnicity" : "Goal Attainment by Category"}
+                </p>
                 <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={goalData} barCategoryGap="30%">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="code" stroke="#94a3b8" fontSize={13} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${v}%`} />
-                    <Tooltip
-                      contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
-                      formatter={(v: any) => [`${Number(v).toFixed(1)}%`]}
-                    />
-                    <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
-                    <Bar dataKey="goal" name="Goal" fill="#334155" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="actual" name="Actual" radius={[4, 4, 0, 0]}>
-                      {goalData.map((entry, i) => (
-                        <Cell key={i} fill={entry.actual >= entry.goal ? "#22c55e" : "#ef4444"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                  {isProject2 ? (
+                    <BarChart data={p2EthChartData} barCategoryGap="25%" layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis type="number" stroke="#94a3b8" fontSize={12} />
+                      <YAxis type="category" dataKey="eth" stroke="#94a3b8" fontSize={11} width={120} />
+                      <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }} />
+                      <Bar dataKey="count" name="Headcount" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  ) : (
+                    <BarChart data={goalData} barCategoryGap="30%">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="code" stroke="#94a3b8" fontSize={13} />
+                      <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${v}%`} />
+                      <Tooltip
+                        contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                        formatter={(v: any) => [`${Number(v).toFixed(1)}%`]}
+                      />
+                      <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
+                      <Bar dataKey="goal" name="Goal" fill="#334155" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="actual" name="Actual" radius={[4, 4, 0, 0]}>
+                        {goalData.map((entry, i) => (
+                          <Cell key={i} fill={entry.actual >= entry.goal ? "#22c55e" : "#ef4444"} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  )}
                 </ResponsiveContainer>
               </div>
 
@@ -328,81 +385,183 @@ export default function DIReportEngine() {
           <div style={{ ...styles.chartCard, ...fadeUp(0.1), overflow: "auto", padding: 0 } as React.CSSProperties}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 20px 16px" }}>
               <p style={styles.chartTitle as React.CSSProperties}>MWBE/SDVOB Utilization</p>
-              <div style={{ display: "flex", gap: 8 }}>
-                {Object.entries(COLORS).map(([code, color]) => (
-                  <span key={code} style={{ background: `${color}22`, color, padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
-                    {code}: {cats[code]?.count || 0} firms
-                  </span>
-                ))}
-              </div>
+              {!isProject2 && (
+                <div style={{ display: "flex", gap: 8 }}>
+                  {Object.entries(COLORS).map(([code, color]) => (
+                    <span key={code} style={{ background: `${color}22`, color, padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
+                      {code}: {cats[code]?.count || 0} firms
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            <ReviewTable />
+
+            {isProject2 ? (
+              // Project 2 utilization table
+              <table style={{ ...styles.reportTable, margin: 0 } as React.CSSProperties}>
+                <thead>
+                  <tr>
+                    <th style={styles.reportTh as React.CSSProperties}>Company</th>
+                    <th style={styles.reportTh as React.CSSProperties}>Value</th>
+                    <th style={styles.reportTh as React.CSSProperties}>Towards Goal</th>
+                    <th style={styles.reportTh as React.CSSProperties}>Paid to Date</th>
+                    <th style={styles.reportTh as React.CSSProperties}>Pending Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {P2_UTIL.map((row) => (
+                    <tr key={row.id}>
+                      <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
+                      <td style={styles.reportTd as React.CSSProperties}>{fmt(row.value)}</td>
+                      <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
+                      <td style={{ ...styles.reportTd, color: '#22c55e', fontWeight: 600 } as React.CSSProperties}>{fmt(row.paid_to_date)}</td>
+                      <td style={{ ...styles.reportTd, color: row.pending_payment > 0 ? '#f59e0b' : '#94a3b8' } as React.CSSProperties}>{fmt(row.pending_payment)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              // Project 1 interactive review table
+              <ReviewTable />
+            )}
           </div>
         )}
 
         {/* ── WORKFORCE TAB ── */}
         {activeTab === "workforce" && (
           <>
-            <div style={styles.kpiGrid as React.CSSProperties}>
-              {[
-                { label: "Total EEO Headcount", value: totalHeadcount.toLocaleString(), accent: "#6366f1" },
-                { label: "African American", value: `${totalBlack.toLocaleString()} (${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)})`, accent: "#8b5cf6" },
-                { label: "Hispanic", value: `${totalHispanic.toLocaleString()} (${pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)})`, accent: "#ec4899" },
-                { label: "Asian", value: `${totalAsian.toLocaleString()} (${pct(totalHeadcount ? totalAsian / totalHeadcount : 0)})`, accent: "#3b82f6" },
-              ].map((kpi, i) => (
-                <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
-                  <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
-                  <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
-                  <p style={{ ...styles.kpiValue, fontSize: 22 } as React.CSSProperties}>{kpi.value}</p>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ ...styles.chartCard, ...fadeUp(0.2) } as React.CSSProperties}>
-              <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Group</p>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={workforceData} barCategoryGap="25%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="group" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
-                    formatter={(v: any) => [`${v.toLocaleString()} workers`]}
-                  />
-                  <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
-                    {workforceData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div style={{ ...styles.chartCard, ...fadeUp(0.3) } as React.CSSProperties}>
-              <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Employer</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                {WORKFORCE.map((emp, i) => (
-                  <div key={i} style={{ background: '#0d1323', padding: 16, borderRadius: 8, border: '1px solid #1e293b' }}>
-                    <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.employer}</p>
-                    <div style={{ height: 180 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={[emp]} barCategoryGap="25%">
-                          <XAxis dataKey="month" hide />
-                          <YAxis stroke="#94a3b8" fontSize={10} width={30} />
-                          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 11 }} />
-                          <Bar dataKey="asian" name="Asian" stackId="a" fill="#3b82f6" />
-                          <Bar dataKey="black" name="Black" stackId="a" fill="#8b5cf6" />
-                          <Bar dataKey="hispanic" name="Hispanic" stackId="a" fill="#ec4899" />
-                          <Bar dataKey="white" name="White" stackId="a" fill="#14b8a6" />
-                          <Bar dataKey="pacific_islander" name="Pacific Isl." stackId="a" fill="#f59e0b" />
-                          <Bar dataKey="unknown" name="Unknown" stackId="a" fill="#94a3b8" />
-                        </BarChart>
-                      </ResponsiveContainer>
+            {isProject2 ? (
+              // -- PROJECT 2 WORKFORCE DEMOGRAPHICS --
+              <>
+                <div style={styles.kpiGrid as React.CSSProperties}>
+                  {[
+                    { label: "Total EEO Headcount", value: p2TotalHeadcount.toLocaleString(), accent: "#6366f1" },
+                    { label: "Total Hours Worked", value: p2TotalHours.toLocaleString(), accent: "#8b5cf6" },
+                    { label: "Firms Reporting", value: [...new Set(P2_EEO.map(r => r.company))].length.toString(), accent: "#ec4899" },
+                    { label: "Total Gross Wages", value: fmt(P2_EEO.reduce((s, r) => s + r.gross_wages, 0)), accent: "#3b82f6" },
+                  ].map((kpi, i) => (
+                    <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
+                      <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
+                      <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
+                      <p style={{ ...styles.kpiValue, fontSize: 22 } as React.CSSProperties}>{kpi.value}</p>
                     </div>
+                  ))}
+                </div>
+
+                <div style={styles.chartGrid as React.CSSProperties}>
+                  <div style={{ ...styles.chartCard, ...fadeUp(0.2) } as React.CSSProperties}>
+                    <p style={styles.chartTitle as React.CSSProperties}>EEO Headcount by Ethnicity</p>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={p2EthChartData} barCategoryGap="25%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="eth" stroke="#94a3b8" fontSize={11} />
+                        <YAxis stroke="#94a3b8" fontSize={12} />
+                        <Tooltip
+                          contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                          formatter={(v: any) => [`${v.toLocaleString()} workers`]}
+                        />
+                        <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
+                          {p2EthChartData.map((_, i) => (
+                            <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  <div style={{ ...styles.chartCard, ...fadeUp(0.3) } as React.CSSProperties}>
+                    <p style={styles.chartTitle as React.CSSProperties}>EEO Headcount by Gender</p>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={p2GenderChartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={65}
+                          outerRadius={105}
+                          paddingAngle={3}
+                          dataKey="count"
+                          nameKey="gender"
+                        >
+                          {p2GenderChartData.map((entry, i) => (
+                            <Cell key={i} fill={entry.gender === "Female" ? "#ec4899" : entry.gender === "Male" ? "#3b82f6" : "#f59e0b"} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                          formatter={(v: any, name: string | undefined) => [`${v.toLocaleString()} workers`, name]}
+                        />
+                        <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 13 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // -- PROJECT 1 WORKFORCE DEMOGRAPHICS --
+              <>
+                <div style={styles.kpiGrid as React.CSSProperties}>
+                  {[
+                    { label: "Total EEO Headcount", value: totalHeadcount.toLocaleString(), accent: "#6366f1" },
+                    { label: "African American", value: `${totalBlack.toLocaleString()} (${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)})`, accent: "#8b5cf6" },
+                    { label: "Hispanic", value: `${totalHispanic.toLocaleString()} (${pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)})`, accent: "#ec4899" },
+                    { label: "Asian", value: `${totalAsian.toLocaleString()} (${pct(totalHeadcount ? totalAsian / totalHeadcount : 0)})`, accent: "#3b82f6" },
+                  ].map((kpi, i) => (
+                    <div key={i} style={{ ...styles.kpiCard, ...fadeUp(i * 0.08) } as React.CSSProperties}>
+                      <div style={{ ...styles.kpiAccent, background: kpi.accent } as React.CSSProperties} />
+                      <p style={styles.kpiLabel as React.CSSProperties}>{kpi.label}</p>
+                      <p style={{ ...styles.kpiValue, fontSize: 22 } as React.CSSProperties}>{kpi.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ ...styles.chartCard, ...fadeUp(0.2) } as React.CSSProperties}>
+                  <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Group</p>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={workforceData} barCategoryGap="25%">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="group" stroke="#94a3b8" fontSize={12} />
+                      <YAxis stroke="#94a3b8" fontSize={12} />
+                      <Tooltip
+                        contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                        formatter={(v: any) => [`${v.toLocaleString()} workers`]}
+                      />
+                      <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
+                        {workforceData.map((_, i) => (
+                          <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div style={{ ...styles.chartCard, ...fadeUp(0.3) } as React.CSSProperties}>
+                  <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Employer</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                    {WORKFORCE.map((emp, i) => (
+                      <div key={i} style={{ background: '#0d1323', padding: 16, borderRadius: 8, border: '1px solid #1e293b' }}>
+                        <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.employer}</p>
+                        <div style={{ height: 180 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={[emp]} barCategoryGap="25%">
+                              <XAxis dataKey="month" hide />
+                              <YAxis stroke="#94a3b8" fontSize={10} width={30} />
+                              <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 11 }} />
+                              <Bar dataKey="asian" name="Asian" stackId="a" fill="#3b82f6" />
+                              <Bar dataKey="black" name="Black" stackId="a" fill="#8b5cf6" />
+                              <Bar dataKey="hispanic" name="Hispanic" stackId="a" fill="#ec4899" />
+                              <Bar dataKey="white" name="White" stackId="a" fill="#14b8a6" />
+                              <Bar dataKey="pacific_islander" name="Pacific Isl." stackId="a" fill="#f59e0b" />
+                              <Bar dataKey="unknown" name="Unknown" stackId="a" fill="#94a3b8" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
 
@@ -424,54 +583,67 @@ export default function DIReportEngine() {
 
               <div style={styles.reportSection as React.CSSProperties}>
                 <h3 style={styles.reportSectionTitle as React.CSSProperties}>1. Executive Summary</h3>
-                <p style={styles.reportText as React.CSSProperties}>
-                  As of {PROJECT.report_date}, the total contract value for the {PROJECT.project_name} project stands at <strong>{fmt(PROJECT.total_contract_value)}</strong>.
-                  Total payments made to MWBE and SDVOB subcontractors to date amount to <strong>{fmt(Object.values(catTotals).reduce((a, c) => a + c.paid, 0))}</strong>,
-                  representing <strong>{pct(Object.values(catTotals).reduce((a, c) => a + c.paid, 0) / PROJECT.total_contract_value)}</strong> of the total contract value.
-                  The project currently engages <strong>{SUBCONTRACTORS.length} certified diverse subcontractors</strong> across MBE, WBE, and SDVOB categories.
-                </p>
+                {isProject2 ? (
+                  <p style={styles.reportText as React.CSSProperties}>
+                    As of {PROJECT.report_date}, the total tracked contract value for Project 2 utilization stands at <strong>{fmt(p2TotalContract)}</strong>.
+                    Total payments made to tracked subcontractors to date amount to <strong>{fmt(p2TotalPaid)}</strong>,
+                    representing <strong>{pct(p2TotalContract > 0 ? p2TotalPaid / p2TotalContract : 0)}</strong> of the total contract value.
+                    The project currently tracks utilization across <strong>{P2_UTIL.length} recorded firms</strong> and monitors EEO compliance across <strong>{p2TotalHeadcount} employees</strong>.
+                  </p>
+                ) : (
+                  <p style={styles.reportText as React.CSSProperties}>
+                    As of {PROJECT.report_date}, the total contract value for the {PROJECT.project_name} project stands at <strong>{fmt(PROJECT.total_contract_value)}</strong>.
+                    Total payments made to MWBE and SDVOB subcontractors to date amount to <strong>{fmt(Object.values(catTotals).reduce((a, c) => a + c.paid, 0))}</strong>,
+                    representing <strong>{pct(Object.values(catTotals).reduce((a, c) => a + c.paid, 0) / PROJECT.total_contract_value)}</strong> of the total contract value.
+                    The project currently engages <strong>{SUBCONTRACTORS.length} certified diverse subcontractors</strong> across MBE, WBE, and SDVOB categories.
+                  </p>
+                )}
               </div>
 
-              <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Utilization Goal Attainment</h3>
-                <table style={styles.reportTable as React.CSSProperties}>
-                  <thead>
-                    <tr>
-                      <th style={styles.reportTh as React.CSSProperties}>Category</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Goal</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Actual</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(diversity_goals).map(([code, goal]) => {
-                      const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
-                      const met = actual >= goal;
-                      return (
-                        <tr key={code}>
-                          <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
-                          <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
-                          <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>
-                            <span style={{ background: met ? "#dcfce7" : "#fef2f2", color: met ? "#16a34a" : "#dc2626", padding: "2px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600 }}>
-                              {met ? "✓ Met" : "✗ Below"}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              {!isProject2 && (
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Utilization Goal Attainment</h3>
+                  <table style={styles.reportTable as React.CSSProperties}>
+                    <thead>
+                      <tr>
+                        <th style={styles.reportTh as React.CSSProperties}>Category</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Goal</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Actual</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(diversity_goals).map(([code, goal]) => {
+                        const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
+                        const met = actual >= goal;
+                        return (
+                          <tr key={code}>
+                            <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
+                            <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
+                            <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>
+                              <span style={{ background: met ? "#dcfce7" : "#fef2f2", color: met ? "#16a34a" : "#dc2626", padding: "2px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600 }}>
+                                {met ? "✓ Met" : "✗ Below"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
               <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. EEO Workforce Utilization</h3>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>
+                  {isProject2 ? "2. EEO Workforce Utilization" : "3. EEO Workforce Utilization"}
+                </h3>
                 <p style={styles.reportText as React.CSSProperties}>
-                  Total EEO headcount logged this reporting period is <strong>{totalHeadcount.toLocaleString()} workers</strong>.
-                  Diverse workforce participation includes African American workers at {pct(totalHeadcount ? totalBlack / totalHeadcount : 0)},
-                  Hispanic workers at {pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)}, and Asian workers at {pct(totalHeadcount ? totalAsian / totalHeadcount : 0)} of total headcount.
+                  Total EEO headcount logged this reporting period is <strong>{isProject2 ? p2TotalHeadcount.toLocaleString() : totalHeadcount.toLocaleString()} workers</strong>.
+                  {isProject2 && ` They have collectively recorded ${p2TotalHours.toLocaleString()} hours across ${[...new Set(P2_EEO.map(r => r.company))].length} different reporting companies.`}
+                  {!isProject2 && ` Diverse workforce participation includes African American workers at ${pct(totalHeadcount ? totalBlack / totalHeadcount : 0)}, Hispanic workers at ${pct(totalHeadcount ? totalHispanic / totalHeadcount : 0)}, and Asian workers at ${pct(totalHeadcount ? totalAsian / totalHeadcount : 0)} of total headcount.`}
                 </p>
               </div>
 
@@ -514,15 +686,15 @@ function Header({ subtitle }: { subtitle: string }) {
 
 // ── KEYFRAMES ──
 const keyframes = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
+      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+      @keyframes fadeUp {
+        to {opacity: 1; transform: translateY(0); }
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+      @keyframes pulse {
+        0 %, 100 % { opacity: 0.6; }
+    50% {opacity: 1; }
   }
-`;
+      `;
 
 // ── STYLES ──
 const styles: Record<string, React.CSSProperties> = {

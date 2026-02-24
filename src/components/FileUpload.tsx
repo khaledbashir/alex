@@ -18,11 +18,23 @@ export default function FileUpload() {
         onDrop: async (acceptedFiles) => {
             try {
                 if (acceptedFiles.length === 0) return;
-                const file = acceptedFiles[0];
-                const data = await parseMWBEExcel(file);
-                setReportData(data);
-                toast.success('Excel file imported successfully!', {
-                    description: `Loaded ${data.mwbe_sdvob_subcontractors_report.length} records.`
+
+                let accumulatedData: any = {};
+
+                // Process all dropped files concurrently or sequentially
+                for (const file of acceptedFiles) {
+                    const data = await parseMWBEExcel(file);
+                    accumulatedData = { ...accumulatedData, ...data };
+                }
+
+                setReportData(accumulatedData);
+
+                const numRecords = (accumulatedData.mwbe_sdvob_subcontractors_report?.length || 0) +
+                    (accumulatedData.project2_utilization?.length || 0) +
+                    (accumulatedData.project2_eeo_data?.length || 0);
+
+                toast.success(`Successfully processed ${acceptedFiles.length} file(s)`, {
+                    description: `Loaded ${numRecords} total records.`
                 });
             } catch (err: any) {
                 toast.error('Failed to parse file', {
@@ -41,7 +53,7 @@ export default function FileUpload() {
                 </div>
                 <div className="text-center">
                     <p className="text-sm font-medium">
-                        {isDragActive ? "Drop the file here" : "Click or drag your raw Excel dump here"}
+                        {isDragActive ? "Drop the files here" : "Click or drag your raw Excel file(s) here"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                         Supports .xlsx and .xls formats

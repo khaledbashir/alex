@@ -1,0 +1,72 @@
+
+
+=== SUMMARIZING: ./raw data participation.xlsx ===
+
+-- Sheet: "Data" (ID: 1) --
+Dimensions: 758 rows x 20 columns
+First 5 rows:
+Row 1: [null,"Company","Year","Date2","Quarter","Occupation Classifications (SOC Major Group)","SOC Job Title","EEO Job Title","SOC Job Code","Race/Ethnicity","Gender","No. of Employees","No. of Hours Worked","Gross Wages","Column1"]
+Row 2: [null,"Crosby-Brownlie, Inc.",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Plumbers, Pipefitters, and Steamfitters","Craft Workers","47-2152","Caucasian/White","Male",3,36.5,1826.03,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":50.02821917808219}]
+Row 3: [null,"Crosby-Brownlie, Inc.",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Plumbers, Pipefitters, and Steamfitters","Craft Workers","47-2152","Caucasian/White","Female",0,0,null,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":{"error":"#DIV/0!"}}]
+Row 4: [null,"FAHS Construction Group",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Construction Laborers","Labors and Helpers","47-2061","Caucasian/White","Male",1,4,192.8,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":48.2}]
+Row 5: [null,"FAHS Construction Group",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Carpenters","Craft Workers","47-2031","Caucasian/White","Male",2,64,3259.52,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":50.93}]
+
+
+=== SUMMARIZING: ./Utilization Payment Data.xlsx ===
+
+-- Sheet: "Table 1" (ID: 1) --
+Dimensions: 43 rows x 5 columns
+First 5 rows:
+Row 1: [null,{"richText":[{"font":{"bold":true,"size":7,"color":{"argb":"FF262140"},"name":"Century Gothic","family":2},"text":"MBE"}]},{"richText":[{"font":{"bold":true,"size":7,"color":{"argb":"FF262140"},"name":"Century Gothic","family":2},"text":"VALUE"}]},{"richText":[{"font":{"bold":true,"size":7,"color":{"argb":"FF262140"},"name":"Century Gothic","family":2},"text":"TOWARDS THE GOAL"}]},{"richText":[{"font":{"bold":true,"size":7,"color":{"argb":"FF262140"},"name":"Century Gothic","family":2},"text":"PAID TO DATE"},{"font":{"bold":true,"size":7,"name":"Century Gothic","family":2},"text":" "}]},{"richText":[{"font":{"bold":true,"size":7,"color":{"argb":"FF262140"},"name":"Century Gothic","family":2},"text":"PENDING PAYMENT"}]}]
+Row 2: [null,{"richText":[{"font":{"size":7,"color":{"argb":"FF262140"},"name":"Microsoft Sans Serif","family":2},"text":"Dyno Group Inc"}]},1194548,{"formula":"B2","result":1194548},{"formula":"C2","result":1194548},{"formula":"C2-D2"}]
+Row 3: [null,{"richText":[{"font":{"size":7,"color":{"argb":"FF262140"},"name":"Microsoft Sans Serif","family":2},"text":"Kim Industries Inc"}]},319500,319500,303988,{"formula":"B3-D3","result":15512}]
+Row 4: [null,{"richText":[{"font":{"size":7,"color":{"argb":"FF262140"},"name":"Microsoft Sans Serif","family":2},"text":"Right Price Companies Inc"}]},250000,150000,0,{"formula":"B4-D4","result":250000}]
+Row 5: [null,{"richText":[{"font":{"size":7,"color":{"argb":"FF262140"},"name":"Microsoft Sans Serif","family":2},"text":"The Stalwart Development Group "}]},2579155,2579155,2551613,{"formula":"B5-D5","result":27542}]
+
+
+=== SUMMARIZING: ./EEO Data 2.10.26.xlsx ===
+
+-- Sheet: "Employees by Gender" (ID: 32) --
+Dimensions: 168 rows x 25 columns
+First 5 rows:
+Row 1: [null,"WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER"]
+Row 2: [null,null,"Caucasian/White","Caucasian/White","Black/African American","Black/African American","Hispanic/Latino","Hispanic/Latino","Asian/Pacific Islander","Asian/Pacific Islander","Native American/Indigenous","Native American/Indigenous","Total Count"]
+Row 3: [null,null,""]
+Row 4: [null,null,"Caucasian/White",null,"Black/African American",null,"Hispanic/Latino",null,"Asian/Pacific Islander",null,"Native American/Alaskan Native",null,"Total Count","Total %"]
+Row 5: [null,"","Count","%","Count","%","Count","%","Count","%","Count","%"]
+
+-- Sheet: "Hours Worked by Gender" (ID: 20) --
+Dimensions: 164 rows x 25 columns
+First 5 rows:
+Row 1: [null,"WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER","WORKFORCE ETHNICITY BREAKDOWN - HOURS WORKED ON SITE BY GENDER"]
+Row 2: [null,null,"Caucasian/White","Caucasian/White","Black/African American","Black/African American","Hispanic/Latino","Hispanic/Latino","Asian/Pacific Islander","Asian/Pacific Islander","Native American/Indigenous","Native American/Indigenous","Total Count"]
+Row 3: [null,null,""]
+Row 4: [null,null,"Caucasian/White",null,"Black/African American",null,"Hispanic/Latino",null,"Asian/Pacific Islander",null,"Native American/Alaskan Native",null,"Total Count","Total %"]
+Row 5: [null,"","Count","%","Count","%","Count","%","Count","%","Count","%"]
+
+-- Sheet: "2025 Contractor" (ID: 34) --
+Dimensions: 267 rows x 25 columns
+First 5 rows:
+Row 1: [null,"WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN -  TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR"]
+Row 2: [null,"Year",2025]
+Row 3: [null,"Quarter","Q4"]
+Row 4: [null,null,"Caucasian/White","Caucasian/White","Black/African American","Black/African American","Hispanic/Latino","Hispanic/Latino","Asian/Pacific Islander","Asian/Pacific Islander","Native American/Indigenous",null,"Total Count"]
+Row 5: [null,null,""]
+
+-- Sheet: "Contractor" (ID: 22) --
+Dimensions: 134 rows x 15 columns
+First 5 rows:
+Row 1: [null,"WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR","WORKFORCE ETHNICITY BREAKDOWN - TOTAL EMPLOYEE WORKDAYS ON SITE BY CONTRACTOR"]
+Row 2: [null,null,"Caucasian/White","Caucasian/White","Black/African American","Black/African American","Hispanic/Latino","Hispanic/Latino","Asian/Pacific Islander","Asian/Pacific Islander","Native American/Indigenous",null,"Total Count"]
+Row 3: [null,null,""]
+Row 4: [null,null,"Caucasian/White",null,"Black/African American",null,"Hispanic/Latino",null,"Asian/Pacific Islander",null,"Native American/Alaskan Native",null,"Total Count","Total %"]
+Row 5: [null,"","Count","%","Count","%","Count","%","Count","%","Count","%"]
+
+-- Sheet: "Data" (ID: 11) --
+Dimensions: 758 rows x 20 columns
+First 5 rows:
+Row 1: [null,"Company","Year","Date2","Quarter","Occupation Classifications (SOC Major Group)","SOC Job Title","EEO Job Title","SOC Job Code","Race/Ethnicity","Gender","No. of Employees","No. of Hours Worked","Gross Wages","Column1"]
+Row 2: [null,"Crosby-Brownlie, Inc.",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Plumbers, Pipefitters, and Steamfitters","Craft Workers","47-2152","Caucasian/White","Male",3,36.5,1826.03,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":50.02821917808219}]
+Row 3: [null,"Crosby-Brownlie, Inc.",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Plumbers, Pipefitters, and Steamfitters","Craft Workers","47-2152","Caucasian/White","Female",0,0,null,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":{"error":"#DIV/0!"}}]
+Row 4: [null,"FAHS Construction Group",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Construction Laborers","Labors and Helpers","47-2061","Caucasian/White","Male",1,4,192.8,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":48.2}]
+Row 5: [null,"FAHS Construction Group",2023,"2023-07-01T00:00:00.000Z","Q3","Construction and Extraction","Carpenters","Craft Workers","47-2031","Caucasian/White","Male",2,64,3259.52,{"formula":"Data[[#This Row],[Gross Wages]]/Data[[#This Row],[No. of Hours Worked]]","result":50.93}]
