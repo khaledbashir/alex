@@ -162,17 +162,17 @@ function parseProject2EEO(dataSheet: ExcelJS.Worksheet) {
     dataSheet.eachRow((row, rowNumber) => {
         if (rowNumber < 2) return; // Skip headers
 
-        const company = row.getCell(2).text?.trim();
+        const company = row.getCell(1).text?.trim();
         if (!company) return;
 
-        const year = row.getCell(3).value;
-        const quarter = row.getCell(5).text?.trim() || String(year);
+        const year = row.getCell(2).value;
+        const quarter = row.getCell(4).text?.trim() || String(year);
 
-        const race_ethnicity = row.getCell(10).text?.trim() || 'Unknown';
-        const gender = row.getCell(11).text?.trim() || 'Unknown';
-        const num_employees = Number(row.getCell(12).value) || 0;
-        const hours_worked = Number(row.getCell(13).value) || 0;
-        const gross_wages = Number(row.getCell(14).value) || 0;
+        const race_ethnicity = row.getCell(9).text?.trim() || 'Unknown';
+        const gender = row.getCell(10).text?.trim() || 'Unknown';
+        const num_employees = Number(row.getCell(11).value) || 0;
+        const hours_worked = Number(row.getCell(12).value) || 0;
+        const gross_wages = Number(row.getCell(13).value) || 0;
 
         records.push({
             id: `p2-eeo-${rowNumber}`,

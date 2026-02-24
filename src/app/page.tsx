@@ -200,8 +200,8 @@ export default function DIReportEngine() {
 
   // ── DASHBOARD / REPORT SCREEN ──
   const PROJECT = isProject2
-    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: p2TotalContract }
-    : { ...project_details, quarter: 'Q4 2025', report_date: new Date().toISOString().split('T')[0], total_contract_value: 48750000 };
+    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", quarter: 'Q4 2025', report_date: "2025-12-31", total_contract_value: p2TotalContract }
+    : { ...project_details, quarter: 'Q4 2025', report_date: "2025-12-31", total_contract_value: 48750000 };
 
   const goalData = Object.entries(diversity_goals).map(([code, goal]) => ({
     code,
@@ -790,7 +790,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: "2px solid transparent",
     transition: "all 0.2s",
   },
-  tabActive: { color: "#f8fafc", borderBottomColor: "#6366f1" },
+  tabActive: { color: "#f8fafc", borderBottom: "2px solid #6366f1" },
   content: { padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
 
   // KPIs
