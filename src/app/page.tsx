@@ -1116,3 +1116,21 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
 };
+
+// ── DACK LOGO ──
+function DackLogo({ scale = 1 }: { scale?: number }) {
+  return (
+    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", transform: `scale(${scale})`, transformOrigin: "right center" }}>
+      <div style={{ display: "flex", alignItems: "center", color: "#c1272d", fontWeight: "normal", fontSize: 46, letterSpacing: "1px", fontFamily: "Georgia, serif" }}>
+        <span style={{ paddingRight: 6 }}>D</span>
+        <div style={{ height: 42, width: 1, backgroundColor: "#64748b", margin: "0 6px" }} />
+        <span style={{ padding: "0 6px" }}>A</span>
+        <div style={{ height: 42, width: 1, backgroundColor: "#64748b", margin: "0 6px" }} />
+        <span style={{ padding: "0 6px" }}>C</span>
+        <div style={{ height: 42, width: 1, backgroundColor: "#64748b", margin: "0 6px" }} />
+        <span style={{ paddingLeft: 6 }}>K</span>
+      </div>
+      <span style={{ fontSize: 9, color: "#333", marginTop: 4, letterSpacing: "4px", fontFamily: "sans-serif", fontWeight: 600, textTransform: "uppercase" }}>CONSULTING SOLUTIONS, INC</span>
+    </div>
+  );
+}
