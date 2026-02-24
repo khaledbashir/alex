@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       </html>
     `;
 
-        const JSREPORT_URL = "http://jsreport:5488";
+        const JSREPORT_URL = process.env.JSREPORT_URL || "http://jsreport:5488";
 
         // Config showed authentication disabled, but we keep it flexible
         const res = await fetch(`${JSREPORT_URL}/api/report`, {
