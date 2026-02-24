@@ -79,20 +79,42 @@ export default function DIReportEngine() {
     };
 
   const handleExportPDF = async () => {
-    if (!reportRef.current) return;
     setIsExporting(true);
     try {
-      const reportHtml = reportRef.current.innerHTML;
       const response = await fetch('/api/export-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          html: reportHtml,
-          filename: `${PROJECT.project_name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.pdf`
-        })
+          project: {
+            project_name: PROJECT.project_name,
+            project_no: PROJECT.project_no,
+            contractor: PROJECT.contractor,
+            report_period: PROJECT.report_period,
+            report_date: PROJECT.report_date,
+            total_contract_value: PROJECT.total_contract_value,
+          },
+          isProject2,
+          diversity_goals,
+          subcontractors: SUBCONTRACTORS,
+          workforce: WORKFORCE,
+          p2_util: P2_UTIL,
+          p2_eeo: P2_EEO,
+          catTotals: cats,
+          p2Totals: {
+            contract: p2TotalContract,
+            towardsGoal: p2TotalTowardsGoal,
+            paid: p2TotalPaid,
+            headcount: p2TotalHeadcount,
+            hours: p2TotalHours,
+          },
+          filename: `${PROJECT.project_name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+        }),
       });
 
-      if (!response.ok) throw new Error('Export failed');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.details || 'Export failed');
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -101,9 +123,10 @@ export default function DIReportEngine() {
       a.download = `${PROJECT.project_name.replace(/\s+/g, '_')}_Report.pdf`;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
+      console.error('PDF Export Error:', err);
       alert("Failed to export PDF. Please try again.");
     } finally {
       setIsExporting(false);
