@@ -133,16 +133,23 @@ function parseProject1(subsSheet: ExcelJS.Worksheet, workforceSheet: ExcelJS.Wor
 function parseProject2Utilization(utilSheet: ExcelJS.Worksheet) {
     const records: any[] = [];
 
+    const cleanNum = (val: any) => {
+        if (typeof val === 'number') return val;
+        if (!val) return 0;
+        const str = String(val).replace(/[^0-9.-]+/g, "");
+        return Number(str) || 0;
+    };
+
     utilSheet.eachRow((row, rowNumber) => {
         if (rowNumber < 2) return; // Skip headers
 
         const company = row.getCell(1).text?.trim();
         if (!company || company === 'MBE Total' || company === 'WBE Total' || company === 'SDVOB Total' || company === 'Totals:') return;
 
-        const value = Number(row.getCell(2).result ?? row.getCell(2).value) || Number(row.getCell(2).text) || 0;
-        const towards_goal = Number(row.getCell(3).result ?? row.getCell(3).value) || Number(row.getCell(3).text) || 0;
-        const paid_to_date = Number(row.getCell(4).result ?? row.getCell(4).value) || Number(row.getCell(4).text) || 0;
-        const pending_payment = Number(row.getCell(5).result ?? row.getCell(5).value) || Number(row.getCell(5).text) || 0;
+        const value = cleanNum(row.getCell(2).result ?? row.getCell(2).value ?? row.getCell(2).text);
+        const towards_goal = cleanNum(row.getCell(3).result ?? row.getCell(3).value ?? row.getCell(3).text);
+        const paid_to_date = cleanNum(row.getCell(4).result ?? row.getCell(4).value ?? row.getCell(4).text);
+        const pending_payment = cleanNum(row.getCell(5).result ?? row.getCell(5).value ?? row.getCell(5).text);
 
         records.push({
             id: `p2-util-${rowNumber}`,

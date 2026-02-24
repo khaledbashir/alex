@@ -103,7 +103,33 @@ export default function DIReportEngine() {
   });
   const p2GenderChartData = Object.entries(p2GenderTotals).map(([gender, count]) => ({ gender, count })).filter(d => d.count > 0);
 
-  // ── UPLOAD SCREEN ──
+  // Workforce Breakdown by Ethnicity & Gender
+  const p2EthGenderMap: Record<string, { eth: string; maleHours: number; femaleHours: number; maleCount: number; femaleCount: number }> = {};
+  P2_EEO.forEach(row => {
+    if (!p2EthGenderMap[row.race_ethnicity]) {
+      p2EthGenderMap[row.race_ethnicity] = { eth: row.race_ethnicity, maleHours: 0, femaleHours: 0, maleCount: 0, femaleCount: 0 };
+    }
+    if (row.gender === 'Male') {
+      p2EthGenderMap[row.race_ethnicity].maleCount += row.num_employees;
+      p2EthGenderMap[row.race_ethnicity].maleHours += row.hours_worked;
+    } else {
+      p2EthGenderMap[row.race_ethnicity].femaleCount += row.num_employees;
+      p2EthGenderMap[row.race_ethnicity].femaleHours += row.hours_worked;
+    }
+  });
+  const p2BreakdownChartData = Object.values(p2EthGenderMap);
+
+  // Ethnicity Breakdown by Contractor
+  const p2ContractorEthMap: Record<string, any> = {};
+  P2_EEO.forEach(row => {
+    if (!p2ContractorEthMap[row.company]) {
+      p2ContractorEthMap[row.company] = { company: row.company, 'Caucasian/White': 0, 'Black/African American': 0, 'Hispanic/Latino': 0, 'Asian/Pacific Islander': 0, 'Native American/Alaskan Native': 0, total: 0 };
+    }
+    p2ContractorEthMap[row.company][row.race_ethnicity] = (p2ContractorEthMap[row.company][row.race_ethnicity] || 0) + row.num_employees;
+    p2ContractorEthMap[row.company].total += row.num_employees;
+  });
+  const p2ContractorEthData = Object.values(p2ContractorEthMap).sort((a, b) => b.total - a.total);
+
   if (screen === "upload") {
     return (
       <div style={styles.app as React.CSSProperties}>
@@ -115,7 +141,7 @@ export default function DIReportEngine() {
             onDrop={handleFileUpload}
             onClick={() => fileRef.current?.click()}
           >
-            <input ref={fileRef} type="file" style={{ display: "none" }} onChange={handleFileUpload} />
+            <input ref={fileRef} type="file" multiple style={{ display: "none" }} onChange={handleFileUpload} />
             <div style={styles.uploadIcon as React.CSSProperties}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -496,6 +522,58 @@ export default function DIReportEngine() {
                     </ResponsiveContainer>
                   </div>
                 </div>
+
+                <div style={styles.chartGrid as React.CSSProperties}>
+                  <div style={{ ...styles.chartCard, ...fadeUp(0.4) } as React.CSSProperties}>
+                    <p style={styles.chartTitle as React.CSSProperties}>Workforce Breakdown by Ethnicity &amp; Gender (Headcount)</p>
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={p2BreakdownChartData} barCategoryGap="20%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="eth" stroke="#94a3b8" fontSize={10} interval={0} tick={{ width: 90 }} />
+                        <YAxis stroke="#94a3b8" fontSize={11} />
+                        <Tooltip contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }} />
+                        <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 13 }} />
+                        <Bar dataKey="maleCount" name="Male Employees" fill="#3b82f6" stackId="emp" />
+                        <Bar dataKey="femaleCount" name="Female Employees" fill="#f472b6" stackId="emp" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ ...styles.chartCard, ...fadeUp(0.5) } as React.CSSProperties}>
+                    <p style={styles.chartTitle as React.CSSProperties}>Total Hours by Ethnicity &amp; Gender</p>
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={p2BreakdownChartData} barCategoryGap="20%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="eth" stroke="#94a3b8" fontSize={10} interval={0} tick={{ width: 90 }} />
+                        <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => v > 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                        <Tooltip contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }} />
+                        <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 13 }} />
+                        <Bar dataKey="maleHours" name="Male Hours" fill="#3b82f6" stackId="hrs" />
+                        <Bar dataKey="femaleHours" name="Female Hours" fill="#f472b6" stackId="hrs" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {p2ContractorEthData.length > 0 && (
+                  <div style={{ ...styles.chartCard, ...fadeUp(0.6) } as React.CSSProperties}>
+                    <p style={styles.chartTitle as React.CSSProperties}>Ethnicity Breakdown by Contractor</p>
+                    <ResponsiveContainer width="100%" height={Math.max(300, p2ContractorEthData.length * 45)}>
+                      <BarChart data={p2ContractorEthData} layout="vertical" barSize={18} margin={{ left: 130 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                        <XAxis type="number" stroke="#94a3b8" fontSize={11} />
+                        <YAxis type="category" dataKey="company" stroke="#334155" fontSize={10} width={130} tick={{ fill: "#334155" }} />
+                        <Tooltip contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }} />
+                        <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12, paddingTop: 10 }} />
+                        <Bar dataKey="Caucasian/White" name="Caucasian/White" fill="#3b82f6" stackId="eth" />
+                        <Bar dataKey="Black/African American" name="Black/African American" fill="#334155" stackId="eth" />
+                        <Bar dataKey="Hispanic/Latino" name="Hispanic/Latino" fill="#ec4899" stackId="eth" />
+                        <Bar dataKey="Asian/Pacific Islander" name="Asian/Pacific Islander" fill="#14b8a6" stackId="eth" />
+                        <Bar dataKey="Native American/Alaskan Native" name="Native American" fill="#f59e0b" stackId="eth" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </>
             ) : (
               // -- PROJECT 1 WORKFORCE DEMOGRAPHICS --
