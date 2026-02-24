@@ -304,19 +304,19 @@ export default function DIReportEngine() {
                 <ResponsiveContainer width="100%" height={260}>
                   {isProject2 ? (
                     <BarChart data={p2EthChartData} barCategoryGap="25%" layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis type="number" stroke="#94a3b8" fontSize={12} />
                       <YAxis type="category" dataKey="eth" stroke="#94a3b8" fontSize={11} width={120} />
-                      <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }} />
+                      <Tooltip contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }} />
                       <Bar dataKey="count" name="Headcount" fill="#3b82f6" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   ) : (
                     <BarChart data={goalData} barCategoryGap="30%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="code" stroke="#94a3b8" fontSize={13} />
                       <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${v}%`} />
                       <Tooltip
-                        contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                        contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                         formatter={(v: any) => [`${Number(v).toFixed(1)}%`]}
                       />
                       <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
@@ -350,7 +350,7 @@ export default function DIReportEngine() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                      contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                       formatter={(v: any, name: string | undefined) => [`${v.toLocaleString()} hrs`, name]}
                     />
                     <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
@@ -364,11 +364,11 @@ export default function DIReportEngine() {
               <p style={styles.chartTitle as React.CSSProperties}>Payment Status by Category</p>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={paymentData} layout="vertical" barCategoryGap="25%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis type="number" stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `$${(v / 1e6).toFixed(1)}M`} />
                   <YAxis type="category" dataKey="code" stroke="#94a3b8" fontSize={13} width={60} />
                   <Tooltip
-                    contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                    contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                     formatter={(v: any) => [fmt(v)]}
                   />
                   <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
@@ -453,11 +453,11 @@ export default function DIReportEngine() {
                     <p style={styles.chartTitle as React.CSSProperties}>EEO Headcount by Ethnicity</p>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={p2EthChartData} barCategoryGap="25%">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis dataKey="eth" stroke="#94a3b8" fontSize={11} />
                         <YAxis stroke="#94a3b8" fontSize={12} />
                         <Tooltip
-                          contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                          contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                           formatter={(v: any) => [`${v.toLocaleString()} workers`]}
                         />
                         <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
@@ -488,7 +488,7 @@ export default function DIReportEngine() {
                           ))}
                         </Pie>
                         <Tooltip
-                          contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                          contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                           formatter={(v: any, name: string | undefined) => [`${v.toLocaleString()} workers`, name]}
                         />
                         <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 13 }} />
@@ -519,11 +519,11 @@ export default function DIReportEngine() {
                   <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Group</p>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={workforceData} barCategoryGap="25%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="group" stroke="#94a3b8" fontSize={12} />
                       <YAxis stroke="#94a3b8" fontSize={12} />
                       <Tooltip
-                        contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0" }}
+                        contentStyle={{ background: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a" }}
                         formatter={(v: any) => [`${v.toLocaleString()} workers`]}
                       />
                       <Bar dataKey="count" name="Count" radius={[6, 6, 0, 0]}>
@@ -539,14 +539,14 @@ export default function DIReportEngine() {
                   <p style={styles.chartTitle as React.CSSProperties}>EEO Demographics by Employer</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                     {WORKFORCE.map((emp, i) => (
-                      <div key={i} style={{ background: '#0d1323', padding: 16, borderRadius: 8, border: '1px solid #1e293b' }}>
-                        <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.employer}</p>
+                      <div key={i} style={{ background: '#ffffff', padding: 16, borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)' }}>
+                        <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.employer}</p>
                         <div style={{ height: 180 }}>
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={[emp]} barCategoryGap="25%">
                               <XAxis dataKey="month" hide />
-                              <YAxis stroke="#94a3b8" fontSize={10} width={30} />
-                              <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 11 }} />
+                              <YAxis stroke="#64748b" fontSize={10} width={30} />
+                              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 8, color: "#0f172a", fontSize: 11, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
                               <Bar dataKey="asian" name="Asian" stackId="a" fill="#3b82f6" />
                               <Bar dataKey="black" name="Black" stackId="a" fill="#334155" />
                               <Bar dataKey="hispanic" name="Hispanic" stackId="a" fill="#ec4899" />
@@ -580,20 +580,30 @@ export default function DIReportEngine() {
             </div>
 
             {/* PAGE 1: COVER PAGE */}
-            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
-              <div style={{ padding: "120px 0", textAlign: "center" }}>
-                <h1 style={{ fontSize: 42, fontWeight: 900, color: "#0f172a", marginBottom: 32, textTransform: "uppercase", letterSpacing: 2 }}>
-                  Compliance Report Data
-                </h1>
-                <h2 style={{ fontSize: 26, fontWeight: 700, color: "#334155", marginBottom: 12 }}>
-                  {PROJECT.project_name}
-                </h2>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: "#64748b", marginBottom: 64 }}>
-                  Project No. {PROJECT.project_no} — Contractor: {PROJECT.contractor}
-                </h3>
-                <div style={{ display: "inline-block", padding: "16px 32px", background: "#f1f5f9", borderRadius: 8, border: "2px solid #e2e8f0" }}>
-                  <p style={{ fontSize: 24, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.report_period}</p>
-                  <p style={{ fontSize: 14, color: "#64748b", margin: "6px 0 0", fontWeight: 600, textTransform: "uppercase" }}>As of {PROJECT.report_date}</p>
+            <div className="print-page cover-page" style={{ ...styles.reportPage, padding: 0, position: "relative", display: "flex", height: "10.5in" } as React.CSSProperties}>
+
+              {/* Left Side - White */}
+              <div style={{ flex: 1.5, background: "white", padding: "40px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div> {/* Top Logo Space */} </div>
+
+                <div style={{ marginBottom: 40 }}>
+                  <DackLogo scale={0.8} />
+                </div>
+              </div>
+
+              {/* Right Side - Green */}
+              <div style={{ flex: 1, background: "#a3d18e", padding: "60px 40px 40px 40px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                <h2 style={{ fontSize: 24, fontWeight: 500, color: "white", margin: "0 0 16px 0", letterSpacing: "1px" }}>PHASE I</h2>
+                <h1 style={{ fontSize: 32, fontWeight: 700, color: "white", margin: "0 0 8px 0", lineHeight: 1.2 }}>MWBE/EEO<br />OVERVIEW REPORT</h1>
+                <p style={{ fontSize: 14, color: "white", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 16px 0" }}>{PROJECT.report_period}</p>
+                <p style={{ fontSize: 13, color: "white", margin: 0 }}>{new Date().toLocaleDateString()}</p>
+              </div>
+
+              {/* Absolute Black Strap */}
+              <div style={{ position: "absolute", top: "30%", left: 0, width: "100%", background: "black", color: "white", padding: "20px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                <div style={{ textAlign: "right" }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{PROJECT.project_name}</h3>
+                  <p style={{ margin: "4px 0 0 0", fontSize: 14, textTransform: "uppercase" }}>Project No. {PROJECT.project_no}</p>
                 </div>
               </div>
             </div>
@@ -812,55 +822,89 @@ export default function DIReportEngine() {
                 </div>
               </div>
 
-              {/* ATTACHMENTS C-F (Static layout breakers to simulate 27 pages) */}
-              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT C: Contractor Logs</h3>
-                <p>[PAGES 20-21: Subcontractor site logs inserted here]</p>
+              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
+                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 17 of 27</span>
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <DackLogo scale={0.35} />
+                </div>
               </div>
-              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT D: Correspondence</h3>
-                <p>[PAGES 22-24: Email outreach documentation inserted here]</p>
-              </div>
-              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT E: Certificates</h3>
-                <p>[PAGES 25-26: MWBE/SDVOB Certifications inserted here]</p>
-              </div>
-              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT F: Waiver Determination</h3>
-                <p>[PAGE 27: Official state waiver documentation inserted here]</p>
-              </div>
-
             </div>
-        )}
+
+            {/* ATTACHMENTS C-F (Static layout breakers to simulate 27 pages) */}
+            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT C: Contractor Logs</h3>
+              <p>[PAGES 20-21: Subcontractor site logs inserted here]</p>
+
+              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
+                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 20 of 27</span>
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <DackLogo scale={0.35} />
+                </div>
+              </div>
+            </div>
+            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT D: Correspondence</h3>
+              <p>[PAGES 22-24: Email outreach documentation inserted here]</p>
+
+              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
+                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 22 of 27</span>
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <DackLogo scale={0.35} />
+                </div>
+              </div>
+            </div>
+            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT E: Certificates</h3>
+              <p>[PAGES 25-26: MWBE/SDVOB Certifications inserted here]</p>
+
+              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
+                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 25 of 27</span>
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <DackLogo scale={0.35} />
+                </div>
+              </div>
+            </div>
+            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT F: Waiver Determination</h3>
+              <p>[PAGE 27: Official state waiver documentation inserted here]</p>
+
+              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
+                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 27 of 27</span>
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <DackLogo scale={0.35} />
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+      </div>
 
       {/* Back to Upload */}
-        <div style={{ textAlign: "center", padding: "24px 0 40px" }}>
-          <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
-            ← Upload New Report Data
-          </button>
-        </div>
+      <div className="no-print" style={{ textAlign: "center", padding: "24px 0 40px" }}>
+        <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
+          ← Upload New Report Data
+        </button>
       </div>
-      );
+    </div>
+  );
 }
 
-      // ── HEADER ──
-      function Header({subtitle}: {subtitle: string }) {
+// ── HEADER ──
+function Header({ subtitle }: { subtitle: string }) {
   return (
-      <div style={styles.header as React.CSSProperties}>
-        <div>
-          <h1 style={styles.logo as React.CSSProperties}>
-            <span style={{ color: "#dc2626", fontWeight: 900, letterSpacing: "4px" }}>D|A|C|K</span>
-            <span style={{ color: "#f8fafc", fontWeight: 400, marginLeft: 12, fontSize: 16, letterSpacing: "1px" }}>CONSULTING SOLUTIONS</span>
-          </h1>
-          <p style={{ ...styles.subtitle, color: "#94a3b8", marginTop: 8 } as React.CSSProperties}>{subtitle}</p>
-        </div>
+    <div style={styles.header as React.CSSProperties}>
+      <div>
+        <h1 style={{ ...styles.logo, display: 'flex', alignItems: 'center' } as React.CSSProperties}>
+          <DackLogo scale={0.5} />
+        </h1>
+        <p style={{ ...styles.subtitle, color: "#475569", marginTop: 8 } as React.CSSProperties}>{subtitle}</p>
       </div>
-      );
+    </div>
+  );
 }
 
-      // ── KEYFRAMES ──
-      const keyframes = `
+// ── KEYFRAMES ──
+const keyframes = `
       @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
       @keyframes fadeUp {
         to {opacity: 1; transform: translateY(0); }
@@ -871,204 +915,204 @@ export default function DIReportEngine() {
   }
       `;
 
-      // ── STYLES ──
-      const styles: Record<string, React.CSSProperties> = {
-        app: {
-        fontFamily: "'DM Sans', sans-serif",
-      background: "#0a0f1e",
-      minHeight: "100vh",
-      color: "#e2e8f0",
+// ── STYLES ──
+const styles: Record<string, React.CSSProperties> = {
+  app: {
+    fontFamily: "'DM Sans', sans-serif",
+    background: "#f8fafc",
+    minHeight: "100vh",
+    color: "#0f172a",
   },
-      header: {
-        padding: "24px 32px",
-      borderBottom: "1px solid #1e293b",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
+  header: {
+    padding: "24px 32px",
+    borderBottom: "1px solid #e2e8f0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-      logo: {margin: 0, fontSize: 22, fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.5px" },
-      subtitle: {margin: "4px 0 0", fontSize: 13, color: "#64748b" },
+  logo: { margin: 0, fontSize: 22, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.5px" },
+  subtitle: { margin: "4px 0 0", fontSize: 13, color: "#64748b" },
 
-      // Upload
-      uploadContainer: {maxWidth: 720, margin: "0 auto", padding: "48px 24px" },
-      uploadZone: {
-        border: "2px dashed #334155",
-      borderRadius: 16,
-      padding: "56px 40px",
-      textAlign: "center",
-      cursor: "pointer",
-      transition: "border-color 0.2s",
-      background: "#0f172a",
+  // Upload
+  uploadContainer: { maxWidth: 720, margin: "0 auto", padding: "48px 24px" },
+  uploadZone: {
+    border: "2px dashed #cbd5e1",
+    borderRadius: 16,
+    padding: "56px 40px",
+    textAlign: "center",
+    cursor: "pointer",
+    transition: "border-color 0.2s",
+    background: "#ffffff",
   },
-      uploadIcon: {marginBottom: 16 },
-      uploadTitle: {fontSize: 18, fontWeight: 700, color: "#f8fafc", margin: "0 0 8px" },
-      uploadSub: {fontSize: 13, color: "#64748b", margin: 0 },
-      fileCard: {
-        marginTop: 20,
-      padding: "16px 20px",
-      background: "#0f172a",
-      borderRadius: 12,
-      border: "1px solid #1e293b",
-      display: "flex",
-      alignItems: "center",
-      gap: 16,
+  uploadIcon: { marginBottom: 16 },
+  uploadTitle: { fontSize: 18, fontWeight: 700, color: "#0f172a", margin: "0 0 8px" },
+  uploadSub: { fontSize: 13, color: "#64748b", margin: 0 },
+  fileCard: {
+    marginTop: 20,
+    padding: "16px 20px",
+    background: "#ffffff",
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
   },
-      fileIcon: {flexShrink: 0 },
-      fileName: {margin: 0, fontSize: 14, fontWeight: 600, color: "#f8fafc" },
-      fileSize: {margin: "2px 0 0", fontSize: 12, color: "#64748b" },
-      processBtn: {
-        marginLeft: "auto",
-      padding: "10px 24px",
-      background: "#dc2626",
-      color: "#fff",
-      border: "none",
-      borderRadius: 8,
-      fontSize: 14,
-      fontWeight: 700,
-      cursor: "pointer",
+  fileIcon: { flexShrink: 0 },
+  fileName: { margin: 0, fontSize: 14, fontWeight: 600, color: "#0f172a" },
+  fileSize: { margin: "2px 0 0", fontSize: 12, color: "#64748b" },
+  processBtn: {
+    marginLeft: "auto",
+    padding: "10px 24px",
+    background: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
   },
-      infoGrid: {display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 40 },
-      infoCard: {
-        background: "#0f172a",
-      border: "1px solid #1e293b",
-      borderRadius: 12,
-      padding: "24px 20px",
-      textAlign: "center",
+  infoGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 40 },
+  infoCard: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    padding: "24px 20px",
+    textAlign: "center",
   },
-      infoTitle: {fontSize: 15, fontWeight: 700, color: "#f8fafc", margin: "12px 0 6px" },
-      infoDesc: {fontSize: 12, color: "#64748b", margin: 0, lineHeight: 1.5 },
+  infoTitle: { fontSize: 15, fontWeight: 700, color: "#0f172a", margin: "12px 0 6px" },
+  infoDesc: { fontSize: 12, color: "#64748b", margin: 0, lineHeight: 1.5 },
 
-      // Processing
-      processingContainer: {maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center" },
-      progressOuter: {background: "#1e293b", borderRadius: 20, height: 8, overflow: "hidden" },
-      progressInner: {background: "linear-gradient(90deg, #dc2626, #fca5a5)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
-      progressPct: {fontSize: 36, fontWeight: 800, color: "#f8fafc", margin: "20px 0 32px" },
-      stepList: {textAlign: "left" },
-      stepItem: {padding: "8px 0", fontSize: 14, color: "#94a3b8", transition: "opacity 0.3s" },
+  // Processing
+  processingContainer: { maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center" },
+  progressOuter: { background: "#e2e8f0", borderRadius: 20, height: 8, overflow: "hidden" },
+  progressInner: { background: "linear-gradient(90deg, #dc2626, #fca5a5)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
+  progressPct: { fontSize: 36, fontWeight: 800, color: "#0f172a", margin: "20px 0 32px" },
+  stepList: { textAlign: "left" },
+  stepItem: { padding: "8px 0", fontSize: 14, color: "#94a3b8", transition: "opacity 0.3s" },
 
-      // Dashboard
-      tabBar: {
-        display: "flex",
-      gap: 4,
-      padding: "0 32px",
-      borderBottom: "1px solid #1e293b",
-      background: "#0d1323",
+  // Dashboard
+  tabBar: {
+    display: "flex",
+    gap: 4,
+    padding: "0 32px",
+    borderBottom: "1px solid #e2e8f0",
+    background: "#f8fafc",
   },
-      tab: {
-        padding: "14px 20px",
-      background: "none",
-      border: "none",
-      color: "#64748b",
-      fontSize: 13,
-      fontWeight: 600,
-      cursor: "pointer",
-      borderBottom: "2px solid transparent",
-      transition: "all 0.2s",
+  tab: {
+    padding: "14px 20px",
+    background: "transparent",
+    border: "none",
+    color: "#64748b",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    borderBottom: "2px solid transparent",
+    transition: "all 0.2s",
   },
-      tabActive: {color: "#f8fafc", borderBottom: "2px solid #dc2626" },
-      content: {padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
+  tabActive: { color: "#0f172a", borderBottom: "2px solid #dc2626" },
+  content: { padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
 
-      // KPIs
-      kpiGrid: {display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 },
-      kpiCard: {
-        background: "#0f172a",
-      border: "1px solid #1e293b",
-      borderRadius: 12,
-      padding: "20px",
-      position: "relative",
-      overflow: "hidden",
+  // KPIs
+  kpiGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 },
+  kpiCard: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    padding: "20px",
+    position: "relative",
+    overflow: "hidden",
   },
-      kpiAccent: {position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "12px 0 0 12px" },
-      kpiLabel: {margin: 0, fontSize: 12, color: "#64748b", fontWeight: 500 },
-      kpiValue: {margin: "8px 0 0", fontSize: 26, fontWeight: 800, color: "#f8fafc" },
+  kpiAccent: { position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "12px 0 0 12px" },
+  kpiLabel: { margin: 0, fontSize: 12, color: "#64748b", fontWeight: 500 },
+  kpiValue: { margin: "8px 0 0", fontSize: 26, fontWeight: 800, color: "#0f172a" },
 
-      // Charts
-      chartGrid: {display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 },
-      chartCard: {
-        background: "#0f172a",
-      border: "1px solid #1e293b",
-      borderRadius: 12,
-      padding: "20px",
-      marginBottom: 16,
+  // Charts
+  chartGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 },
+  chartCard: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    padding: "20px",
+    marginBottom: 16,
   },
-      chartTitle: {margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#f8fafc" },
+  chartTitle: { margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#0f172a" },
 
-      // Table
-      table: {width: "100%", borderCollapse: "collapse", fontSize: 13 },
-      th: {
-        textAlign: "left",
-      padding: "10px 12px",
-      borderBottom: "2px solid #1e293b",
-      color: "#94a3b8",
-      fontWeight: 600,
-      fontSize: 11,
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
-      whiteSpace: "nowrap",
+  // Table
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+  th: {
+    textAlign: "left",
+    padding: "10px 12px",
+    borderBottom: "2px solid #e2e8f0",
+    color: "#94a3b8",
+    fontWeight: 600,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    whiteSpace: "nowrap",
   },
-      td: {
-        padding: "10px 12px",
-      borderBottom: "1px solid #1e293b22",
-      color: "#cbd5e1",
-      whiteSpace: "nowrap",
-      cursor: "pointer",
+  td: {
+    padding: "10px 12px",
+    borderBottom: "1px solid #1e293b22",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
   },
-      cellInput: {
-        background: "#1e293b",
-      border: "1px solid #dc2626",
-      borderRadius: 4,
-      color: "#f8fafc",
-      padding: "4px 8px",
-      fontSize: 13,
-      width: "100%",
-      fontFamily: "'JetBrains Mono', monospace",
-  },
-
-      // Report Preview
-      reportPreview: {display: "flex", justifyContent: "center" },
-      reportPage: {
-        background: "#ffffff",
-      borderRadius: 12,
-      padding: "48px 56px",
-      maxWidth: 820,
-      width: "100%",
-      color: "#0f172a",
-      boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
-  },
-      reportHeader: {
-        display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      paddingBottom: 20,
-      borderBottom: "3px solid #dc2626",
-      marginBottom: 28,
-  },
-      reportSection: {marginBottom: 28 },
-      reportSectionTitle: {fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #dc2626", paddingLeft: 12 },
-      reportText: {fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 },
-      reportTable: {width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 12 },
-      reportTh: {textAlign: "left", padding: "10px 12px", background: "#f1f5f9", borderBottom: "2px solid #e2e8f0", color: "#475569", fontWeight: 700, fontSize: 11, textTransform: "uppercase" },
-      reportTd: {padding: "10px 12px", borderBottom: "1px solid #f1f5f9", color: "#334155" },
-      exportBtn: {
-        padding: "12px 28px",
-      background: "#dc2626",
-      color: "#fff",
-      border: "none",
-      borderRadius: 8,
-      fontSize: 14,
-      fontWeight: 700,
-      cursor: "pointer",
+  cellInput: {
+    background: "#e2e8f0",
+    border: "1px solid #dc2626",
+    borderRadius: 4,
+    color: "#0f172a",
+    padding: "4px 8px",
+    fontSize: 13,
+    width: "100%",
+    fontFamily: "'JetBrains Mono', monospace",
   },
 
-      // Reset
-      resetBtn: {
-        padding: "10px 24px",
-      background: "none",
-      border: "1px solid #334155",
-      color: "#94a3b8",
-      borderRadius: 8,
-      fontSize: 13,
-      fontWeight: 600,
-      cursor: "pointer",
+  // Report Preview
+  reportPreview: { display: "flex", justifyContent: "center" },
+  reportPage: {
+    background: "#ffffff",
+    borderRadius: 12,
+    padding: "48px 56px",
+    maxWidth: 820,
+    width: "100%",
+    color: "#0f172a",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
+  },
+  reportHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingBottom: 20,
+    borderBottom: "3px solid #dc2626",
+    marginBottom: 28,
+  },
+  reportSection: { marginBottom: 28 },
+  reportSectionTitle: { fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #dc2626", paddingLeft: 12 },
+  reportText: { fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 },
+  reportTable: { width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 12 },
+  reportTh: { textAlign: "left", padding: "10px 12px", background: "#e2e8f0", borderBottom: "2px solid #e2e8f0", color: "#475569", fontWeight: 700, fontSize: 11, textTransform: "uppercase" },
+  reportTd: { padding: "10px 12px", borderBottom: "1px solid #f1f5f9", color: "#334155" },
+  exportBtn: {
+    padding: "12px 28px",
+    background: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+
+  // Reset
+  resetBtn: {
+    padding: "10px 24px",
+    background: "transparent",
+    border: "1px solid #cbd5e1",
+    color: "#94a3b8",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
   },
 };

@@ -24,6 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script defer src="https://basheer-umami.prd42b.easypanel.host/script.js" data-website-id="b16aa71e-5123-4ff2-a426-c21876e160be"></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
