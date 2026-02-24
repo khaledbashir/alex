@@ -581,24 +581,43 @@ export default function DIReportEngine() {
 
             {/* PAGE 1: COVER PAGE */}
             <div className="print-page" style={styles.reportPage as React.CSSProperties}>
-              <div style={{ padding: "80px 0", textAlign: "center" }}>
-                <h1 style={{ fontSize: 36, fontWeight: 900, color: "#0f172a", marginBottom: 24, textTransform: "uppercase" }}>
+              <div style={{ padding: "120px 0", textAlign: "center" }}>
+                <h1 style={{ fontSize: 42, fontWeight: 900, color: "#0f172a", marginBottom: 32, textTransform: "uppercase", letterSpacing: 2 }}>
                   Compliance Report Data
                 </h1>
-                <h2 style={{ fontSize: 24, fontWeight: 700, color: "#334155", marginBottom: 8 }}>
+                <h2 style={{ fontSize: 26, fontWeight: 700, color: "#334155", marginBottom: 12 }}>
                   {PROJECT.project_name}
                 </h2>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: "#64748b", marginBottom: 48 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: "#64748b", marginBottom: 64 }}>
                   Project No. {PROJECT.project_no} — Contractor: {PROJECT.contractor}
                 </h3>
-                <div style={{ display: "inline-block", padding: "12px 24px", background: "#f1f5f9", borderRadius: 8, border: "2px solid #e2e8f0" }}>
-                  <p style={{ fontSize: 22, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.report_period}</p>
-                  <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 600 }}>As of {PROJECT.report_date}</p>
+                <div style={{ display: "inline-block", padding: "16px 32px", background: "#f1f5f9", borderRadius: 8, border: "2px solid #e2e8f0" }}>
+                  <p style={{ fontSize: 24, fontWeight: 800, color: "#dc2626", margin: 0 }}>{PROJECT.report_period}</p>
+                  <p style={{ fontSize: 14, color: "#64748b", margin: "6px 0 0", fontWeight: 600, textTransform: "uppercase" }}>As of {PROJECT.report_date}</p>
                 </div>
               </div>
             </div>
 
-            {/* PAGE 2: EXECUTIVE SUMMARY */}
+            {/* PAGE 2: TABLE OF CONTENTS */}
+            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", marginBottom: 32, textTransform: "uppercase", borderBottom: "2px solid #e2e8f0", paddingBottom: 16 }}>Table of Contents</h2>
+              <div style={{ fontSize: 16, lineHeight: 2.2, color: "#334155" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>1. EXECUTIVE SUMMARY</span><span>1</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>2. GOALS</span><span>2</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>3. OUTREACH</span><span>3</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>4. MWBE/SDVOB COMPLIANCE</span><span>4</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>5. MWBE/SDVOB PAYMENTS</span><span>6</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>6. WORKFORCE DIVERSITY</span><span>10</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, fontWeight: 700 }}><span>ATTACHMENT A: PAYMENT DETAILS</span><span>14</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT B: EEO WORKFORCE UTILIZATION</span><span>17</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT C: CONTRACTOR LOGS</span><span>20</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT D: CORRESPONDENCE</span><span>22</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT E: CERTIFICATES</span><span>25</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT F: WAIVER DETERMINATION</span><span>27</span></div>
+              </div>
+            </div>
+
+            {/* PAGE 3: EXECUTIVE SUMMARY */}
             <div className="print-page" style={styles.reportPage as React.CSSProperties}>
               <div style={styles.reportSection as React.CSSProperties}>
                 <h3 style={styles.reportSectionTitle as React.CSSProperties}>1. Executive Summary</h3>
@@ -617,98 +636,174 @@ export default function DIReportEngine() {
                 )}
               </div>
 
-              <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Outreach Efforts</h3>
-                <p style={styles.reportText as React.CSSProperties}>
-                  To increase participation of MWBE/SDVOB firms in the project, rigorous outreach was provided during the bidding phase. We utilize a variety of methods to engage the community including informational e-blasts, social media outreach, partnering with local chambers and civic organizations, and coordinating information sessions.
-                  <br /><br />
-                  *Note: Specific outreach events for this reporting period are logged in the project communications ledger.*
-                </p>
+              {/* PAGE 4: GOALS & OUTREACH */}
+              <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Goals</h3>
+                  <p style={styles.reportText as React.CSSProperties}>
+                    Project-specific participation goals were established to promote diversity and equitable access to contracting opportunities on the project. After an extensive review of the efforts made to engage and contract MWBE and SDVOB firms, the utilization plan accurately reflects the availability and capacity of qualified firms in the marketplace. DACK Consulting Solutions played a crucial role in documenting, verifying, and justifying any waiver requests by demonstrating good-faith efforts.
+                  </p>
+                </div>
+
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. Outreach Efforts</h3>
+                  <p style={styles.reportText as React.CSSProperties}>
+                    To increase participation of MWBE/SDVOB firms in the project, rigorous outreach was provided during the bidding phase. We utilize a variety of methods to engage the community including informational e-blasts, social media outreach, partnering with local chambers and civic organizations, and coordinating information sessions.
+                    <br /><br />
+                    *Note: Specific outreach events for this reporting period are logged in the project communications ledger.*
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* PAGE 3: COMPLIANCE & GOALS */}
-            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
-              <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. MWBE/SDVOB Compliance</h3>
-                <p style={styles.reportText as React.CSSProperties}>
-                  As the compliance monitor, we play a critical role in supporting and verifying MWBE/SDVOB goals. A key component of these responsibilities includes Compliance Monitoring, which entails reviewing awarded contracts and assessing whether certified firms are being utilized in accordance with established requirements.
-                </p>
+              {/* PAGE 5: COMPLIANCE */}
+              <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. MWBE/SDVOB Compliance</h3>
+                  <p style={styles.reportText as React.CSSProperties}>
+                    As the compliance monitor, we play a critical role in supporting and verifying MWBE/SDVOB goals. A key component of these responsibilities includes Compliance Monitoring, which entails reviewing awarded contracts and assessing whether certified firms are being utilized in accordance with established requirements.
+                  </p>
 
-                {!isProject2 && (
+                  {!isProject2 && (
+                    <div style={{ marginTop: 20 }}>
+                      <h4 style={{ fontSize: 14, fontWeight: 700, color: "#334155", marginBottom: 8 }}>Goal Attainment Status</h4>
+                      <table style={styles.reportTable as React.CSSProperties}>
+                        <thead>
+                          <tr>
+                            <th style={styles.reportTh as React.CSSProperties}>Category</th>
+                            <th style={styles.reportTh as React.CSSProperties}>Goal</th>
+                            <th style={styles.reportTh as React.CSSProperties}>Actual</th>
+                            <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
+                            <th style={styles.reportTh as React.CSSProperties}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(diversity_goals).map(([code, goal]) => {
+                            const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
+                            const met = actual >= goal;
+                            return (
+                              <tr key={code}>
+                                <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
+                                <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
+                                <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
+                                <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
+                                <td style={styles.reportTd as React.CSSProperties}>
+                                  {met ? "✓ Met" : "✗ Below"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* PAGE 6: PAYMENTS LEDGER */}
+              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>4. Payments & Subcontractor Utilization</h3>
+                  <p style={styles.reportText as React.CSSProperties}>
+                    The following table details the tracked financial payments made to subcontractors against their awarded values.
+                  </p>
+
                   <div style={{ marginTop: 20 }}>
-                    <h4 style={{ fontSize: 14, fontWeight: 700, color: "#334155", marginBottom: 8 }}>Goal Attainment Status</h4>
                     <table style={styles.reportTable as React.CSSProperties}>
                       <thead>
                         <tr>
-                          <th style={styles.reportTh as React.CSSProperties}>Category</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Goal</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Actual</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Company</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Contract Value</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Towards Goal</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Paid to Date</th>
                           <th style={styles.reportTh as React.CSSProperties}>Status</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.entries(diversity_goals).map(([code, goal]) => {
-                          const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
-                          const met = actual >= goal;
-                          return (
-                            <tr key={code}>
-                              <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
-                              <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
-                              <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>
-                                {met ? "✓ Met" : "✗ Below"}
-                              </td>
+                        {isProject2 ? (
+                          P2_UTIL.map((row) => (
+                            <tr key={row.id}>
+                              <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.value)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.paid_to_date)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{row.pending_payment > 0 ? 'Pending' : 'Current'}</td>
                             </tr>
-                          );
-                        })}
+                          ))
+                        ) : (
+                          SUBCONTRACTORS.map((row) => (
+                            <tr key={row.id}>
+                              <td style={styles.reportTd as React.CSSProperties}><strong>{row.name}</strong> <span style={{ fontSize: 10, color: '#94a3b8', marginLeft: 6 }}>{row.code}</span></td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_contract)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_paid_to_date)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{row.balance > 0 ? 'Balance Due' : 'Paid Full'}</td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
 
-            {/* PAGE 4: PAYMENTS LEDGER */}
-            <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
-              <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>4. Payments & Subcontractor Utilization</h3>
-                <p style={styles.reportText as React.CSSProperties}>
-                  The following table details the tracked financial payments made to subcontractors against their awarded values.
-                </p>
+              {/* ATTACHMENT A: RAW PAYMENT LOGS (Simulating pages 14-16) */}
+              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%", opacity: 0.5 } as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT A: Payment Details</h3>
+                  <p style={styles.reportText as React.CSSProperties}>[PAGES 14-16 CONTINUED DATA DUMP]</p>
+                </div>
+              </div>
 
-                <div style={{ marginTop: 20 }}>
+              {/* ATTACHMENT B - WORKFORCE UTILIZATION */}
+              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT B: EEO Workforce Utilization</h3>
+
+                  <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
+                    <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                      <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Headcount</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{isProject2 ? p2TotalHeadcount.toLocaleString() : totalHeadcount.toLocaleString()}</p>
+                    </div>
+                    {isProject2 && (
+                      <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                        <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Hours</p>
+                        <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{p2TotalHours.toLocaleString()}</p>
+                      </div>
+                    )}
+                  </div>
+
                   <table style={styles.reportTable as React.CSSProperties}>
                     <thead>
                       <tr>
-                        <th style={styles.reportTh as React.CSSProperties}>Company</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Contract Value</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Towards Goal</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Paid to Date</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Status</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Reporting Firm</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Asian</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Black</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Hispanic</th>
+                        <th style={styles.reportTh as React.CSSProperties}>White</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Pacific Isl.</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Unknown</th>
                       </tr>
                     </thead>
                     <tbody>
                       {isProject2 ? (
-                        P2_UTIL.map((row) => (
+                        // Project 2 has it by race_ethnicity string records, we'd group them by company to show a matrix
+                        // For now, listing out the parsed EEO logs
+                        P2_EEO.slice(0, 50).map((row) => (
                           <tr key={row.id}>
                             <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.value)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.paid_to_date)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{row.pending_payment > 0 ? 'Pending' : 'Current'}</td>
+                            <td colSpan={6} style={styles.reportTd as React.CSSProperties}>{row.num_employees} employees ({row.race_ethnicity} - {row.gender})</td>
                           </tr>
                         ))
                       ) : (
-                        SUBCONTRACTORS.map((row) => (
-                          <tr key={row.id}>
-                            <td style={styles.reportTd as React.CSSProperties}><strong>{row.name}</strong> <span style={{ fontSize: 10, color: '#94a3b8', marginLeft: 6 }}>{row.code}</span></td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_contract)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_paid_to_date)}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{row.balance > 0 ? 'Balance Due' : 'Paid Full'}</td>
+                        WORKFORCE.map((emp, i) => (
+                          <tr key={i}>
+                            <td style={styles.reportTd as React.CSSProperties}><strong>{emp.employer}</strong></td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.asian}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.black}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.hispanic}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.white}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.pacific_islander}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{emp.unknown}</td>
                           </tr>
                         ))
                       )}
@@ -716,97 +811,56 @@ export default function DIReportEngine() {
                   </table>
                 </div>
               </div>
-            </div>
 
-            {/* PAGE 5: ATTACHMENT B - WORKFORCE UTILIZATION */}
-            <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
-              <div style={styles.reportSection as React.CSSProperties}>
-                <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT B: EEO Workforce Utilization</h3>
-
-                <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-                  <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                    <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Headcount</p>
-                    <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{isProject2 ? p2TotalHeadcount.toLocaleString() : totalHeadcount.toLocaleString()}</p>
-                  </div>
-                  {isProject2 && (
-                    <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                      <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Hours</p>
-                      <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{p2TotalHours.toLocaleString()}</p>
-                    </div>
-                  )}
-                </div>
-
-                <table style={styles.reportTable as React.CSSProperties}>
-                  <thead>
-                    <tr>
-                      <th style={styles.reportTh as React.CSSProperties}>Reporting Firm</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Asian</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Black</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Hispanic</th>
-                      <th style={styles.reportTh as React.CSSProperties}>White</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Pacific Isl.</th>
-                      <th style={styles.reportTh as React.CSSProperties}>Unknown</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {isProject2 ? (
-                      // Project 2 has it by race_ethnicity string records, we'd group them by company to show a matrix
-                      // For now, listing out the parsed EEO logs
-                      P2_EEO.slice(0, 50).map((row) => (
-                        <tr key={row.id}>
-                          <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
-                          <td colSpan={6} style={styles.reportTd as React.CSSProperties}>{row.num_employees} employees ({row.race_ethnicity} - {row.gender})</td>
-                        </tr>
-                      ))
-                    ) : (
-                      WORKFORCE.map((emp, i) => (
-                        <tr key={i}>
-                          <td style={styles.reportTd as React.CSSProperties}><strong>{emp.employer}</strong></td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.asian}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.black}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.hispanic}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.white}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.pacific_islander}</td>
-                          <td style={styles.reportTd as React.CSSProperties}>{emp.unknown}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              {/* ATTACHMENTS C-F (Static layout breakers to simulate 27 pages) */}
+              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT C: Contractor Logs</h3>
+                <p>[PAGES 20-21: Subcontractor site logs inserted here]</p>
               </div>
-            </div>
+              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT D: Correspondence</h3>
+                <p>[PAGES 22-24: Email outreach documentation inserted here]</p>
+              </div>
+              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT E: Certificates</h3>
+                <p>[PAGES 25-26: MWBE/SDVOB Certifications inserted here]</p>
+              </div>
+              <div className="print-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
+                <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT F: Waiver Determination</h3>
+                <p>[PAGE 27: Official state waiver documentation inserted here]</p>
+              </div>
 
-          </div>
+            </div>
         )}
-      </div>
+          </div>
 
       {/* Back to Upload */}
-      <div style={{ textAlign: "center", padding: "24px 0 40px" }}>
-        <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
-          ← Upload New Report Data
-        </button>
+        <div style={{ textAlign: "center", padding: "24px 0 40px" }}>
+          <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
+            ← Upload New Report Data
+          </button>
+        </div>
       </div>
-    </div>
-  );
+      );
 }
 
-// ── HEADER ──
-function Header({ subtitle }: { subtitle: string }) {
+      // ── HEADER ──
+      function Header({subtitle}: {subtitle: string }) {
   return (
-    <div style={styles.header as React.CSSProperties}>
-      <div>
-        <h1 style={styles.logo as React.CSSProperties}>
-          <span style={{ color: "#dc2626", fontWeight: 900, letterSpacing: "4px" }}>D|A|C|K</span>
-          <span style={{ color: "#f8fafc", fontWeight: 400, marginLeft: 12, fontSize: 16, letterSpacing: "1px" }}>CONSULTING SOLUTIONS</span>
-        </h1>
-        <p style={{ ...styles.subtitle, color: "#94a3b8", marginTop: 8 } as React.CSSProperties}>{subtitle}</p>
+      <div style={styles.header as React.CSSProperties}>
+        <div>
+          <h1 style={styles.logo as React.CSSProperties}>
+            <span style={{ color: "#dc2626", fontWeight: 900, letterSpacing: "4px" }}>D|A|C|K</span>
+            <span style={{ color: "#f8fafc", fontWeight: 400, marginLeft: 12, fontSize: 16, letterSpacing: "1px" }}>CONSULTING SOLUTIONS</span>
+          </h1>
+          <p style={{ ...styles.subtitle, color: "#94a3b8", marginTop: 8 } as React.CSSProperties}>{subtitle}</p>
+        </div>
       </div>
-    </div>
-  );
+      );
 }
 
-// ── KEYFRAMES ──
-const keyframes = `
+      // ── KEYFRAMES ──
+      const keyframes = `
       @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
       @keyframes fadeUp {
         to {opacity: 1; transform: translateY(0); }
@@ -817,204 +871,204 @@ const keyframes = `
   }
       `;
 
-// ── STYLES ──
-const styles: Record<string, React.CSSProperties> = {
-  app: {
-    fontFamily: "'DM Sans', sans-serif",
-    background: "#0a0f1e",
-    minHeight: "100vh",
-    color: "#e2e8f0",
+      // ── STYLES ──
+      const styles: Record<string, React.CSSProperties> = {
+        app: {
+        fontFamily: "'DM Sans', sans-serif",
+      background: "#0a0f1e",
+      minHeight: "100vh",
+      color: "#e2e8f0",
   },
-  header: {
-    padding: "24px 32px",
-    borderBottom: "1px solid #1e293b",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+      header: {
+        padding: "24px 32px",
+      borderBottom: "1px solid #1e293b",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
   },
-  logo: { margin: 0, fontSize: 22, fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.5px" },
-  subtitle: { margin: "4px 0 0", fontSize: 13, color: "#64748b" },
+      logo: {margin: 0, fontSize: 22, fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.5px" },
+      subtitle: {margin: "4px 0 0", fontSize: 13, color: "#64748b" },
 
-  // Upload
-  uploadContainer: { maxWidth: 720, margin: "0 auto", padding: "48px 24px" },
-  uploadZone: {
-    border: "2px dashed #334155",
-    borderRadius: 16,
-    padding: "56px 40px",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "border-color 0.2s",
-    background: "#0f172a",
+      // Upload
+      uploadContainer: {maxWidth: 720, margin: "0 auto", padding: "48px 24px" },
+      uploadZone: {
+        border: "2px dashed #334155",
+      borderRadius: 16,
+      padding: "56px 40px",
+      textAlign: "center",
+      cursor: "pointer",
+      transition: "border-color 0.2s",
+      background: "#0f172a",
   },
-  uploadIcon: { marginBottom: 16 },
-  uploadTitle: { fontSize: 18, fontWeight: 700, color: "#f8fafc", margin: "0 0 8px" },
-  uploadSub: { fontSize: 13, color: "#64748b", margin: 0 },
-  fileCard: {
-    marginTop: 20,
-    padding: "16px 20px",
-    background: "#0f172a",
-    borderRadius: 12,
-    border: "1px solid #1e293b",
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
+      uploadIcon: {marginBottom: 16 },
+      uploadTitle: {fontSize: 18, fontWeight: 700, color: "#f8fafc", margin: "0 0 8px" },
+      uploadSub: {fontSize: 13, color: "#64748b", margin: 0 },
+      fileCard: {
+        marginTop: 20,
+      padding: "16px 20px",
+      background: "#0f172a",
+      borderRadius: 12,
+      border: "1px solid #1e293b",
+      display: "flex",
+      alignItems: "center",
+      gap: 16,
   },
-  fileIcon: { flexShrink: 0 },
-  fileName: { margin: 0, fontSize: 14, fontWeight: 600, color: "#f8fafc" },
-  fileSize: { margin: "2px 0 0", fontSize: 12, color: "#64748b" },
-  processBtn: {
-    marginLeft: "auto",
-    padding: "10px 24px",
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
+      fileIcon: {flexShrink: 0 },
+      fileName: {margin: 0, fontSize: 14, fontWeight: 600, color: "#f8fafc" },
+      fileSize: {margin: "2px 0 0", fontSize: 12, color: "#64748b" },
+      processBtn: {
+        marginLeft: "auto",
+      padding: "10px 24px",
+      background: "#dc2626",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer",
   },
-  infoGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 40 },
-  infoCard: {
-    background: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: 12,
-    padding: "24px 20px",
-    textAlign: "center",
+      infoGrid: {display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 40 },
+      infoCard: {
+        background: "#0f172a",
+      border: "1px solid #1e293b",
+      borderRadius: 12,
+      padding: "24px 20px",
+      textAlign: "center",
   },
-  infoTitle: { fontSize: 15, fontWeight: 700, color: "#f8fafc", margin: "12px 0 6px" },
-  infoDesc: { fontSize: 12, color: "#64748b", margin: 0, lineHeight: 1.5 },
+      infoTitle: {fontSize: 15, fontWeight: 700, color: "#f8fafc", margin: "12px 0 6px" },
+      infoDesc: {fontSize: 12, color: "#64748b", margin: 0, lineHeight: 1.5 },
 
-  // Processing
-  processingContainer: { maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center" },
-  progressOuter: { background: "#1e293b", borderRadius: 20, height: 8, overflow: "hidden" },
-  progressInner: { background: "linear-gradient(90deg, #dc2626, #fca5a5)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
-  progressPct: { fontSize: 36, fontWeight: 800, color: "#f8fafc", margin: "20px 0 32px" },
-  stepList: { textAlign: "left" },
-  stepItem: { padding: "8px 0", fontSize: 14, color: "#94a3b8", transition: "opacity 0.3s" },
+      // Processing
+      processingContainer: {maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center" },
+      progressOuter: {background: "#1e293b", borderRadius: 20, height: 8, overflow: "hidden" },
+      progressInner: {background: "linear-gradient(90deg, #dc2626, #fca5a5)", height: "100%", borderRadius: 20, transition: "width 0.4s ease" },
+      progressPct: {fontSize: 36, fontWeight: 800, color: "#f8fafc", margin: "20px 0 32px" },
+      stepList: {textAlign: "left" },
+      stepItem: {padding: "8px 0", fontSize: 14, color: "#94a3b8", transition: "opacity 0.3s" },
 
-  // Dashboard
-  tabBar: {
-    display: "flex",
-    gap: 4,
-    padding: "0 32px",
-    borderBottom: "1px solid #1e293b",
-    background: "#0d1323",
+      // Dashboard
+      tabBar: {
+        display: "flex",
+      gap: 4,
+      padding: "0 32px",
+      borderBottom: "1px solid #1e293b",
+      background: "#0d1323",
   },
-  tab: {
-    padding: "14px 20px",
-    background: "none",
-    border: "none",
-    color: "#64748b",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    borderBottom: "2px solid transparent",
-    transition: "all 0.2s",
+      tab: {
+        padding: "14px 20px",
+      background: "none",
+      border: "none",
+      color: "#64748b",
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
+      borderBottom: "2px solid transparent",
+      transition: "all 0.2s",
   },
-  tabActive: { color: "#f8fafc", borderBottom: "2px solid #dc2626" },
-  content: { padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
+      tabActive: {color: "#f8fafc", borderBottom: "2px solid #dc2626" },
+      content: {padding: "24px 32px", maxWidth: 1200, margin: "0 auto" },
 
-  // KPIs
-  kpiGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 },
-  kpiCard: {
-    background: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: 12,
-    padding: "20px",
-    position: "relative",
-    overflow: "hidden",
+      // KPIs
+      kpiGrid: {display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 },
+      kpiCard: {
+        background: "#0f172a",
+      border: "1px solid #1e293b",
+      borderRadius: 12,
+      padding: "20px",
+      position: "relative",
+      overflow: "hidden",
   },
-  kpiAccent: { position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "12px 0 0 12px" },
-  kpiLabel: { margin: 0, fontSize: 12, color: "#64748b", fontWeight: 500 },
-  kpiValue: { margin: "8px 0 0", fontSize: 26, fontWeight: 800, color: "#f8fafc" },
+      kpiAccent: {position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "12px 0 0 12px" },
+      kpiLabel: {margin: 0, fontSize: 12, color: "#64748b", fontWeight: 500 },
+      kpiValue: {margin: "8px 0 0", fontSize: 26, fontWeight: 800, color: "#f8fafc" },
 
-  // Charts
-  chartGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 },
-  chartCard: {
-    background: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: 12,
-    padding: "20px",
-    marginBottom: 16,
+      // Charts
+      chartGrid: {display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 },
+      chartCard: {
+        background: "#0f172a",
+      border: "1px solid #1e293b",
+      borderRadius: 12,
+      padding: "20px",
+      marginBottom: 16,
   },
-  chartTitle: { margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#f8fafc" },
+      chartTitle: {margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#f8fafc" },
 
-  // Table
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
-  th: {
-    textAlign: "left",
-    padding: "10px 12px",
-    borderBottom: "2px solid #1e293b",
-    color: "#94a3b8",
-    fontWeight: 600,
-    fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    whiteSpace: "nowrap",
+      // Table
+      table: {width: "100%", borderCollapse: "collapse", fontSize: 13 },
+      th: {
+        textAlign: "left",
+      padding: "10px 12px",
+      borderBottom: "2px solid #1e293b",
+      color: "#94a3b8",
+      fontWeight: 600,
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      whiteSpace: "nowrap",
   },
-  td: {
-    padding: "10px 12px",
-    borderBottom: "1px solid #1e293b22",
-    color: "#cbd5e1",
-    whiteSpace: "nowrap",
-    cursor: "pointer",
+      td: {
+        padding: "10px 12px",
+      borderBottom: "1px solid #1e293b22",
+      color: "#cbd5e1",
+      whiteSpace: "nowrap",
+      cursor: "pointer",
   },
-  cellInput: {
-    background: "#1e293b",
-    border: "1px solid #dc2626",
-    borderRadius: 4,
-    color: "#f8fafc",
-    padding: "4px 8px",
-    fontSize: 13,
-    width: "100%",
-    fontFamily: "'JetBrains Mono', monospace",
-  },
-
-  // Report Preview
-  reportPreview: { display: "flex", justifyContent: "center" },
-  reportPage: {
-    background: "#ffffff",
-    borderRadius: 12,
-    padding: "48px 56px",
-    maxWidth: 820,
-    width: "100%",
-    color: "#0f172a",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
-  },
-  reportHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingBottom: 20,
-    borderBottom: "3px solid #dc2626",
-    marginBottom: 28,
-  },
-  reportSection: { marginBottom: 28 },
-  reportSectionTitle: { fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #dc2626", paddingLeft: 12 },
-  reportText: { fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 },
-  reportTable: { width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 12 },
-  reportTh: { textAlign: "left", padding: "10px 12px", background: "#f1f5f9", borderBottom: "2px solid #e2e8f0", color: "#475569", fontWeight: 700, fontSize: 11, textTransform: "uppercase" },
-  reportTd: { padding: "10px 12px", borderBottom: "1px solid #f1f5f9", color: "#334155" },
-  exportBtn: {
-    padding: "12px 28px",
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
+      cellInput: {
+        background: "#1e293b",
+      border: "1px solid #dc2626",
+      borderRadius: 4,
+      color: "#f8fafc",
+      padding: "4px 8px",
+      fontSize: 13,
+      width: "100%",
+      fontFamily: "'JetBrains Mono', monospace",
   },
 
-  // Reset
-  resetBtn: {
-    padding: "10px 24px",
-    background: "none",
-    border: "1px solid #334155",
-    color: "#94a3b8",
-    borderRadius: 8,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
+      // Report Preview
+      reportPreview: {display: "flex", justifyContent: "center" },
+      reportPage: {
+        background: "#ffffff",
+      borderRadius: 12,
+      padding: "48px 56px",
+      maxWidth: 820,
+      width: "100%",
+      color: "#0f172a",
+      boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
+  },
+      reportHeader: {
+        display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      paddingBottom: 20,
+      borderBottom: "3px solid #dc2626",
+      marginBottom: 28,
+  },
+      reportSection: {marginBottom: 28 },
+      reportSectionTitle: {fontSize: 16, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", borderLeft: "4px solid #dc2626", paddingLeft: 12 },
+      reportText: {fontSize: 13, lineHeight: 1.7, color: "#334155", margin: 0 },
+      reportTable: {width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 12 },
+      reportTh: {textAlign: "left", padding: "10px 12px", background: "#f1f5f9", borderBottom: "2px solid #e2e8f0", color: "#475569", fontWeight: 700, fontSize: 11, textTransform: "uppercase" },
+      reportTd: {padding: "10px 12px", borderBottom: "1px solid #f1f5f9", color: "#334155" },
+      exportBtn: {
+        padding: "12px 28px",
+      background: "#dc2626",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer",
+  },
+
+      // Reset
+      resetBtn: {
+        padding: "10px 24px",
+      background: "none",
+      border: "1px solid #334155",
+      color: "#94a3b8",
+      borderRadius: 8,
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
   },
 };
