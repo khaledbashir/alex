@@ -124,3 +124,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  /* Hide all UI elements meant for screen */
+  body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Main Print Container */
+  .print-only {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Report Page Styling */
+  .print-page {
+    page-break-after: always;
+    page-break-inside: avoid;
+    padding: 1in; /* Standard margins */
+    width: 100%;
+    min-height: 10in; /* approximate letter height */
+  }
+
+  /* Table styling for print to prevent breaking rows */
+  table, tr, td, th {
+    page-break-inside: avoid !important;
+  }
+
+  h1, h2, h3, h4, h5 {
+    page-break-after: avoid;
+  }
+}
