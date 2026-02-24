@@ -136,18 +136,19 @@ function parseProject2Utilization(utilSheet: ExcelJS.Worksheet) {
     utilSheet.eachRow((row, rowNumber) => {
         if (rowNumber < 2) return; // Skip headers
 
-        const company = row.getCell(2).text?.trim();
-        if (!company) return;
+        const company = row.getCell(1).text?.trim();
+        if (!company || company === 'MBE Total' || company === 'WBE Total' || company === 'SDVOB Total' || company === 'Totals:') return;
 
-        const value = Number(row.getCell(3).result ?? row.getCell(3).value) || 0;
-        const paid_to_date = Number(row.getCell(4).result ?? row.getCell(4).value) || 0;
-        const pending_payment = Number(row.getCell(5).result ?? row.getCell(5).value) || 0;
+        const value = Number(row.getCell(2).result ?? row.getCell(2).value) || Number(row.getCell(2).text) || 0;
+        const towards_goal = Number(row.getCell(3).result ?? row.getCell(3).value) || Number(row.getCell(3).text) || 0;
+        const paid_to_date = Number(row.getCell(4).result ?? row.getCell(4).value) || Number(row.getCell(4).text) || 0;
+        const pending_payment = Number(row.getCell(5).result ?? row.getCell(5).value) || Number(row.getCell(5).text) || 0;
 
         records.push({
             id: `p2-util-${rowNumber}`,
             company,
             value,
-            towards_goal: value, // Placeholder, no strict 60% rule visible here yet
+            towards_goal,
             paid_to_date,
             pending_payment
         });
