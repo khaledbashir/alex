@@ -21,11 +21,13 @@ const fadeUp = (delay: number = 0): React.CSSProperties => ({
 
 // ── MAIN APP ──
 export default function DIReportEngine() {
-  const [screen, setScreen] = useState("upload"); // upload | processing | dashboard | report
+  const [screen, setScreen] = useState<"upload" | "processing" | "dashboard">("upload");
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isExporting, setIsExporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   const {
     project_details,
@@ -38,6 +40,75 @@ export default function DIReportEngine() {
   } = useReportStore();
 
   const isProject2 = P2_UTIL.length > 0 || P2_EEO.length > 0;
+
+  // Derived Category Totals (Project 1)
+  const catTotals: Record<string, { contract: number; paid: number; count: number }> = {};
+  SUBCONTRACTORS.forEach((s) => {
+    const code = s.code === 'Non-M/WBE' ? 'Non-MWBE' : s.code;
+    if (!catTotals[code]) catTotals[code] = { contract: 0, paid: 0, count: 0 };
+    catTotals[code].contract += (s.towards_goal || s.total_contract);
+    catTotals[code].paid += s.total_paid_to_date;
+    catTotals[code].count += 1;
+  });
+  const cats = catTotals;
+
+  // Derived Totals (Project 2)
+  const p2TotalContract = P2_UTIL.reduce((sum, row) => sum + row.value, 0);
+  const p2TotalTowardsGoal = P2_UTIL.reduce((sum, row) => sum + row.towards_goal, 0);
+  const p2TotalPaid = P2_UTIL.reduce((sum, row) => sum + row.paid_to_date, 0);
+
+  const p2TotalHeadcount = P2_EEO.reduce((sum, row) => sum + row.num_employees, 0);
+  const p2TotalHours = P2_EEO.reduce((sum, row) => sum + row.hours_worked, 0);
+
+  // Unified PROJECT metadata that supports both Project 1 and Project 2 schemas
+  const PROJECT = isProject2
+    ? {
+      project_name: "Project 2 (Utilization & EEO)",
+      project_no: "Multi",
+      contractor: "Various",
+      report_period: 'Q4 2025',
+      report_date: "2025-12-31",
+      total_contract_value: p2TotalContract
+    }
+    : {
+      ...project_details,
+      project_id: project_details.project_no,
+      report_period: 'Q4 2025',
+      report_date: "2025-12-31",
+      total_contract_value: 48750000
+    };
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current) return;
+    setIsExporting(true);
+    try {
+      const reportHtml = reportRef.current.innerHTML;
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          html: reportHtml,
+          filename: `${PROJECT.project_name.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.pdf`
+        })
+      });
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${PROJECT.project_name.replace(/\s+/g, '_')}_Report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
     e.preventDefault();
@@ -87,24 +158,6 @@ export default function DIReportEngine() {
 
 
 
-  // Derived Category Totals (Project 1)
-  const catTotals: Record<string, { contract: number; paid: number; count: number }> = {};
-  SUBCONTRACTORS.forEach((s) => {
-    const code = s.code === 'Non-M/WBE' ? 'Non-MWBE' : s.code;
-    if (!catTotals[code]) catTotals[code] = { contract: 0, paid: 0, count: 0 };
-    catTotals[code].contract += (s.towards_goal || s.total_contract);
-    catTotals[code].paid += s.total_paid_to_date;
-    catTotals[code].count += 1;
-  });
-  const cats = catTotals;
-
-  // Derived Totals (Project 2)
-  const p2TotalContract = P2_UTIL.reduce((sum, row) => sum + row.value, 0);
-  const p2TotalTowardsGoal = P2_UTIL.reduce((sum, row) => sum + row.towards_goal, 0);
-  const p2TotalPaid = P2_UTIL.reduce((sum, row) => sum + row.paid_to_date, 0);
-
-  const p2TotalHeadcount = P2_EEO.reduce((sum, row) => sum + row.num_employees, 0);
-  const p2TotalHours = P2_EEO.reduce((sum, row) => sum + row.hours_worked, 0);
 
   // Group P2 Demographics by Ethnicity
   const p2EthTotals: Record<string, number> = {};
@@ -242,9 +295,6 @@ export default function DIReportEngine() {
   }
 
   // ── DASHBOARD / REPORT SCREEN ──
-  const PROJECT = isProject2
-    ? { project_name: "Project 2 (Utilization & EEO)", project_no: "Multi", contractor: "Various", report_period: 'Q4 2025', report_date: "2025-12-31", total_contract_value: p2TotalContract }
-    : { ...project_details, report_period: 'Q4 2025', report_date: "2025-12-31", total_contract_value: 48750000 };
 
   const goalData = Object.entries(diversity_goals).map(([code, goal]) => ({
     code,
@@ -661,12 +711,21 @@ export default function DIReportEngine() {
         )}
 
         {activeTab === "report" && (
-          <div style={{ ...styles.reportPreview, ...fadeUp(0.1), flexDirection: "column", gap: "24px" } as React.CSSProperties}>
+          <div ref={reportRef} style={{ ...styles.reportPreview, ...fadeUp(0.1), flexDirection: "column", gap: "24px" } as React.CSSProperties}>
 
-            {/* Action Bar */}
             <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", maxWidth: 820, width: "100%" }}>
-              <button style={styles.exportBtn as React.CSSProperties} onClick={() => window.print()}>
-                🖨️ Export as PDF
+              <button
+                style={{
+                  ...styles.exportBtn,
+                  opacity: isExporting ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                } as React.CSSProperties}
+                onClick={handleExportPDF}
+                disabled={isExporting}
+              >
+                {isExporting ? '⏳ Generating PDF...' : '🖨️ Export as PDF'}
               </button>
             </div>
 
