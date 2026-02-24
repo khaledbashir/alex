@@ -41,34 +41,51 @@ export default function DIReportEngine() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
     e.preventDefault();
-    let file: File | null = null;
-    if ('dataTransfer' in e && e.dataTransfer?.files.length) file = e.dataTransfer.files[0];
-    else if ('target' in e && (e.target as HTMLInputElement).files?.length) file = (e.target as HTMLInputElement).files![0];
+    let files: File[] = [];
+    if ('dataTransfer' in e && e.dataTransfer?.files.length) {
+      files = Array.from(e.dataTransfer.files);
+    } else if ('target' in e && (e.target as HTMLInputElement).files?.length) {
+      files = Array.from((e.target as HTMLInputElement).files!);
+    }
 
-    if (file) {
-      setUploadedFile(file.name);
-      setScreen("processing");
-      try {
+    if (files.length === 0) return;
+
+    setUploadedFile(files.length === 1 ? files[0].name : `${files.length} files selected`);
+    setScreen("processing");
+    setProgress(0);
+
+    // Start progress animation immediately
+    const progressSteps = [
+      { p: 20, t: 200 }, { p: 45, t: 500 }, { p: 70, t: 900 }, { p: 90, t: 1400 },
+    ];
+    progressSteps.forEach(({ p, t }) => setTimeout(() => setProgress(p), t));
+
+    try {
+      let mergedData: any = {};
+      for (const file of files) {
         const data = await parseMWBEExcel(file);
-        setReportData(data);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to parse Excel file.");
+        // Deep merge: for array fields, concatenate rather than overwrite
+        for (const [key, value] of Object.entries(data)) {
+          if (Array.isArray(value) && Array.isArray(mergedData[key])) {
+            mergedData[key] = [...mergedData[key], ...value];
+          } else if (value !== undefined) {
+            mergedData[key] = value;
+          }
+        }
       }
+      setReportData(mergedData);
+      // Navigate to dashboard only after data is ready
+      setProgress(100);
+      setTimeout(() => setScreen("dashboard"), 400);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to parse Excel file(s). Check console for details.");
+      setScreen("upload");
     }
   };
 
-  // Simulated processing
-  useEffect(() => {
-    if (screen === "processing" && uploadedFile) {
-      const steps = [
-        { p: 15, t: 300 }, { p: 35, t: 600 }, { p: 65, t: 1000 },
-        { p: 85, t: 1500 }, { p: 100, t: 2000 },
-      ];
-      steps.forEach(({ p, t }) => setTimeout(() => setProgress(p), t));
-      setTimeout(() => setScreen("dashboard"), 2200);
-    }
-  }, [screen, uploadedFile]);
+
+
 
   // Derived Category Totals (Project 1)
   const catTotals: Record<string, { contract: number; paid: number; count: number }> = {};
@@ -151,7 +168,7 @@ export default function DIReportEngine() {
               </svg>
             </div>
             <p style={styles.uploadTitle as React.CSSProperties}>Drop your Excel report data here</p>
-            <p style={styles.uploadSub as React.CSSProperties}>Accepts .xlsx, .xls, .csv — Raw data, Ad sheets, payment reports</p>
+            <p style={styles.uploadSub as React.CSSProperties}>Accepts .xlsx — Select multiple files at once to merge data (e.g. Utilization + EEO files)</p>
           </div>
 
           {uploadedFile && (
@@ -643,41 +660,28 @@ export default function DIReportEngine() {
           </>
         )}
 
-        {/* ── UNIFIED FINAL REPORT PREVIEW TAB (PDF Export Target) ── */}
         {activeTab === "report" && (
           <div style={{ ...styles.reportPreview, ...fadeUp(0.1), flexDirection: "column", gap: "24px" } as React.CSSProperties}>
 
-            {/* Action Bar (Hidden when printing) */}
+            {/* Action Bar */}
             <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", maxWidth: 820, width: "100%" }}>
-              <button
-                style={styles.exportBtn as React.CSSProperties}
-                onClick={() => window.print()}
-              >
+              <button style={styles.exportBtn as React.CSSProperties} onClick={() => window.print()}>
                 🖨️ Export as PDF
               </button>
             </div>
 
-            {/* PAGE 1: COVER PAGE */}
+            {/* PAGE 1: COVER */}
             <div className="print-page cover-page" style={{ ...styles.reportPage, padding: 0, position: "relative", display: "flex", height: "10.5in" } as React.CSSProperties}>
-
-              {/* Left Side - White */}
               <div style={{ flex: 1.5, background: "white", padding: "40px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div> {/* Top Logo Space */} </div>
-
-                <div style={{ marginBottom: 40 }}>
-                  <DackLogo scale={0.8} />
-                </div>
+                <div />
+                <div style={{ marginBottom: 40 }}><DackLogo scale={0.8} /></div>
               </div>
-
-              {/* Right Side - Green */}
               <div style={{ flex: 1, background: "#a3d18e", padding: "60px 40px 40px 40px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <h2 style={{ fontSize: 24, fontWeight: 500, color: "white", margin: "0 0 16px 0", letterSpacing: "1px" }}>PHASE I</h2>
                 <h1 style={{ fontSize: 32, fontWeight: 700, color: "white", margin: "0 0 8px 0", lineHeight: 1.2 }}>MWBE/EEO<br />OVERVIEW REPORT</h1>
                 <p style={{ fontSize: 14, color: "white", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 16px 0" }}>{PROJECT.report_period}</p>
                 <p style={{ fontSize: 13, color: "white", margin: 0 }}>{new Date().toLocaleDateString()}</p>
               </div>
-
-              {/* Absolute Black Strap */}
               <div style={{ position: "absolute", top: "30%", left: 0, width: "100%", background: "black", color: "white", padding: "20px 40px", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                 <div style={{ textAlign: "right" }}>
                   <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{PROJECT.project_name}</h3>
@@ -690,18 +694,17 @@ export default function DIReportEngine() {
             <div className="print-page" style={styles.reportPage as React.CSSProperties}>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", marginBottom: 32, textTransform: "uppercase", borderBottom: "2px solid #e2e8f0", paddingBottom: 16 }}>Table of Contents</h2>
               <div style={{ fontSize: 16, lineHeight: 2.2, color: "#334155" }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>1. EXECUTIVE SUMMARY</span><span>1</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>2. GOALS</span><span>2</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>3. OUTREACH</span><span>3</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>4. MWBE/SDVOB COMPLIANCE</span><span>4</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>5. MWBE/SDVOB PAYMENTS</span><span>6</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span>6. WORKFORCE DIVERSITY</span><span>10</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, fontWeight: 700 }}><span>ATTACHMENT A: PAYMENT DETAILS</span><span>14</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT B: EEO WORKFORCE UTILIZATION</span><span>17</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT C: CONTRACTOR LOGS</span><span>20</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT D: CORRESPONDENCE</span><span>22</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT E: CERTIFICATES</span><span>25</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}><span>ATTACHMENT F: WAIVER DETERMINATION</span><span>27</span></div>
+                {[
+                  ["1. EXECUTIVE SUMMARY", "3"], ["2. GOALS", "4"], ["3. OUTREACH", "5"],
+                  ["4. MWBE/SDVOB COMPLIANCE", "6"], ["5. MWBE/SDVOB PAYMENTS", "7"], ["6. WORKFORCE DIVERSITY", "9"],
+                  ["ATTACHMENT A: PAYMENT DETAILS", "14"], ["ATTACHMENT B: EEO WORKFORCE UTILIZATION", "17"],
+                  ["ATTACHMENT C: CONTRACTOR LOGS", "20"], ["ATTACHMENT D: CORRESPONDENCE", "22"],
+                  ["ATTACHMENT E: CERTIFICATES", "25"], ["ATTACHMENT F: WAIVER DETERMINATION", "27"],
+                ].map(([title, pg]) => (
+                  <div key={title} style={{ display: "flex", justifyContent: "space-between", fontWeight: title.startsWith("AT") ? 700 : 400, borderTop: title.startsWith("AT") && title.includes("PAYMENT DETAILS") ? "1px solid #e2e8f0" : undefined, marginTop: title.startsWith("AT") && title.includes("PAYMENT DETAILS") ? 16 : undefined, paddingTop: title.startsWith("AT") && title.includes("PAYMENT DETAILS") ? 16 : undefined }}>
+                    <span>{title}</span><span>{pg}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -712,186 +715,112 @@ export default function DIReportEngine() {
                 <p style={styles.reportText as React.CSSProperties}>
                   This report provides a comprehensive overview of the MWBE and SDVOB utilization and EEO workforce compliance for the <strong>{PROJECT.project_name}</strong> project during the <strong>{PROJECT.report_period}</strong> reporting period up to <strong>{PROJECT.report_date}</strong>.
                 </p>
-
                 {isProject2 ? (
                   <p style={styles.reportText as React.CSSProperties}>
-                    As of this period, the total tracked contract value for utilization stands at <strong>{fmt(p2TotalContract)}</strong>. Total payments made to tracked subcontractors to date amount to <strong>{fmt(p2TotalPaid)}</strong>, representing <strong>{pct(p2TotalContract > 0 ? p2TotalPaid / p2TotalContract : 0)}</strong> of the total contract value. The project currently tracks utilization across <strong>{P2_UTIL.length} recorded firms</strong> and monitors EEO compliance for <strong>{p2TotalHeadcount.toLocaleString()} employees</strong>.
+                    As of this period, the total tracked contract value stands at <strong>{fmt(p2TotalContract)}</strong>. Total payments to date amount to <strong>{fmt(p2TotalPaid)}</strong>, representing <strong>{pct(p2TotalContract > 0 ? p2TotalPaid / p2TotalContract : 0)}</strong> of the total contract value. The project tracks utilization across <strong>{P2_UTIL.length} recorded firms</strong> and monitors EEO compliance for <strong>{p2TotalHeadcount.toLocaleString()} employees</strong>.
                   </p>
                 ) : (
                   <p style={styles.reportText as React.CSSProperties}>
-                    As of this period, the total contract value stands at <strong>{fmt(PROJECT.total_contract_value)}</strong>. Total payments made to MWBE and SDVOB subcontractors to date amount to <strong>{fmt(Object.values(catTotals).reduce((a, c) => a + c.paid, 0))}</strong>, representing <strong>{pct(Object.values(catTotals).reduce((a, c) => a + c.paid, 0) / PROJECT.total_contract_value)}</strong> of the total contract value. The project currently engages <strong>{SUBCONTRACTORS.length} certified diverse subcontractors</strong>.
+                    As of this period, the total contract value stands at <strong>{fmt(PROJECT.total_contract_value)}</strong>. Total MWBE/SDVOB payments to date amount to <strong>{fmt(Object.values(catTotals).reduce((a, c) => a + c.paid, 0))}</strong>, representing <strong>{pct(Object.values(catTotals).reduce((a, c) => a + c.paid, 0) / PROJECT.total_contract_value)}</strong> of the contract value. The project engages <strong>{SUBCONTRACTORS.length} certified diverse subcontractors</strong>.
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* PAGE 4: GOALS & OUTREACH */}
-              <div className="print-page" style={styles.reportPage as React.CSSProperties}>
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Goals</h3>
-                  <p style={styles.reportText as React.CSSProperties}>
-                    Project-specific participation goals were established to promote diversity and equitable access to contracting opportunities on the project. After an extensive review of the efforts made to engage and contract MWBE and SDVOB firms, the utilization plan accurately reflects the availability and capacity of qualified firms in the marketplace. DACK Consulting Solutions played a crucial role in documenting, verifying, and justifying any waiver requests by demonstrating good-faith efforts.
-                  </p>
-                </div>
-
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. Outreach Efforts</h3>
-                  <p style={styles.reportText as React.CSSProperties}>
-                    To increase participation of MWBE/SDVOB firms in the project, rigorous outreach was provided during the bidding phase. We utilize a variety of methods to engage the community including informational e-blasts, social media outreach, partnering with local chambers and civic organizations, and coordinating information sessions.
-                    <br /><br />
-                    *Note: Specific outreach events for this reporting period are logged in the project communications ledger.*
-                  </p>
-                </div>
+            {/* PAGE 4: GOALS */}
+            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>2. Goals</h3>
+                <p style={styles.reportText as React.CSSProperties}>
+                  Project-specific participation goals were established to promote diversity and equitable access to contracting opportunities on the project. After an extensive review of the efforts made to engage and contract MWBE and SDVOB firms, the utilization plan accurately reflects the availability and capacity of qualified firms in the marketplace. DACK Consulting Solutions played a crucial role in documenting, verifying, and justifying any waiver requests by demonstrating good-faith efforts.
+                </p>
               </div>
-
-              {/* PAGE 5: COMPLIANCE */}
-              <div className="print-page" style={styles.reportPage as React.CSSProperties}>
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. MWBE/SDVOB Compliance</h3>
-                  <p style={styles.reportText as React.CSSProperties}>
-                    As the compliance monitor, we play a critical role in supporting and verifying MWBE/SDVOB goals. A key component of these responsibilities includes Compliance Monitoring, which entails reviewing awarded contracts and assessing whether certified firms are being utilized in accordance with established requirements.
-                  </p>
-
-                  {!isProject2 && (
-                    <div style={{ marginTop: 20 }}>
-                      <h4 style={{ fontSize: 14, fontWeight: 700, color: "#334155", marginBottom: 8 }}>Goal Attainment Status</h4>
-                      <table style={styles.reportTable as React.CSSProperties}>
-                        <thead>
-                          <tr>
-                            <th style={styles.reportTh as React.CSSProperties}>Category</th>
-                            <th style={styles.reportTh as React.CSSProperties}>Goal</th>
-                            <th style={styles.reportTh as React.CSSProperties}>Actual</th>
-                            <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
-                            <th style={styles.reportTh as React.CSSProperties}>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(diversity_goals).map(([code, goal]) => {
-                            const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
-                            const met = actual >= goal;
-                            return (
-                              <tr key={code}>
-                                <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
-                                <td style={styles.reportTd as React.CSSProperties}>{pct(goal)}</td>
-                                <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
-                                <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
-                                <td style={styles.reportTd as React.CSSProperties}>
-                                  {met ? "✓ Met" : "✗ Below"}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. Outreach Efforts</h3>
+                <p style={styles.reportText as React.CSSProperties}>
+                  To increase participation of MWBE/SDVOB firms in the project, rigorous outreach was provided during the bidding phase. We utilize a variety of methods to engage the community including informational e-blasts, social media outreach, partnering with local chambers and civic organizations, and coordinating information sessions.
+                  <br /><br />
+                  *Note: Specific outreach events for this reporting period are logged in the project communications ledger.*
+                </p>
               </div>
+            </div>
 
-              {/* PAGE 6: PAYMENTS LEDGER */}
-              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>4. Payments & Subcontractor Utilization</h3>
-                  <p style={styles.reportText as React.CSSProperties}>
-                    The following table details the tracked financial payments made to subcontractors against their awarded values.
-                  </p>
-
+            {/* PAGE 5: COMPLIANCE */}
+            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>3. MWBE/SDVOB Compliance</h3>
+                <p style={styles.reportText as React.CSSProperties}>
+                  As the compliance monitor, we play a critical role in supporting and verifying MWBE/SDVOB goals. A key component of these responsibilities includes Compliance Monitoring, which entails reviewing awarded contracts and assessing whether certified firms are being utilized in accordance with established requirements.
+                </p>
+                {!isProject2 && (
                   <div style={{ marginTop: 20 }}>
+                    <h4 style={{ fontSize: 14, fontWeight: 700, color: "#334155", marginBottom: 8 }}>Goal Attainment Status</h4>
                     <table style={styles.reportTable as React.CSSProperties}>
                       <thead>
                         <tr>
-                          <th style={styles.reportTh as React.CSSProperties}>Company</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Contract Value</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Towards Goal</th>
-                          <th style={styles.reportTh as React.CSSProperties}>Paid to Date</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Category</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Goal</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Actual</th>
+                          <th style={styles.reportTh as React.CSSProperties}>Allocated</th>
                           <th style={styles.reportTh as React.CSSProperties}>Status</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {isProject2 ? (
-                          P2_UTIL.map((row) => (
-                            <tr key={row.id}>
-                              <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.value)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.paid_to_date)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{row.pending_payment > 0 ? 'Pending' : 'Current'}</td>
+                        {Object.entries(diversity_goals).map(([code, goal]) => {
+                          const actual = (cats[code]?.contract || 0) / PROJECT.total_contract_value;
+                          const met = actual >= (goal as number);
+                          return (
+                            <tr key={code}>
+                              <td style={styles.reportTd as React.CSSProperties}><strong>{code}</strong></td>
+                              <td style={styles.reportTd as React.CSSProperties}>{pct(goal as number)}</td>
+                              <td style={{ ...styles.reportTd, color: met ? "#16a34a" : "#dc2626", fontWeight: 700 } as React.CSSProperties}>{pct(actual)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{fmt(cats[code]?.contract || 0)}</td>
+                              <td style={styles.reportTd as React.CSSProperties}>{met ? "✓ Met" : "✗ Below"}</td>
                             </tr>
-                          ))
-                        ) : (
-                          SUBCONTRACTORS.map((row) => (
-                            <tr key={row.id}>
-                              <td style={styles.reportTd as React.CSSProperties}><strong>{row.name}</strong> <span style={{ fontSize: 10, color: '#94a3b8', marginLeft: 6 }}>{row.code}</span></td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_contract)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_paid_to_date)}</td>
-                              <td style={styles.reportTd as React.CSSProperties}>{row.balance > 0 ? 'Balance Due' : 'Paid Full'}</td>
-                            </tr>
-                          ))
-                        )}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
-                </div>
+                )}
               </div>
+            </div>
 
-              {/* ATTACHMENT A: RAW PAYMENT LOGS (Simulating pages 14-16) */}
-              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%", opacity: 0.5 } as React.CSSProperties}>
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT A: Payment Details</h3>
-                  <p style={styles.reportText as React.CSSProperties}>[PAGES 14-16 CONTINUED DATA DUMP]</p>
-                </div>
-              </div>
-
-              {/* ATTACHMENT B - WORKFORCE UTILIZATION */}
-              <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
-                <div style={styles.reportSection as React.CSSProperties}>
-                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT B: EEO Workforce Utilization</h3>
-
-                  <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-                    <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                      <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Headcount</p>
-                      <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{isProject2 ? p2TotalHeadcount.toLocaleString() : totalHeadcount.toLocaleString()}</p>
-                    </div>
-                    {isProject2 && (
-                      <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                        <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Hours</p>
-                        <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{p2TotalHours.toLocaleString()}</p>
-                      </div>
-                    )}
-                  </div>
-
+            {/* PAGE 6: PAYMENTS LEDGER */}
+            <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>4. Payments &amp; Subcontractor Utilization</h3>
+                <p style={styles.reportText as React.CSSProperties}>The following table details the tracked financial payments made to subcontractors against their awarded values.</p>
+                <div style={{ marginTop: 20 }}>
                   <table style={styles.reportTable as React.CSSProperties}>
                     <thead>
                       <tr>
-                        <th style={styles.reportTh as React.CSSProperties}>Reporting Firm</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Asian</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Black</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Hispanic</th>
-                        <th style={styles.reportTh as React.CSSProperties}>White</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Pacific Isl.</th>
-                        <th style={styles.reportTh as React.CSSProperties}>Unknown</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Company</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Contract Value</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Towards Goal</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Paid to Date</th>
+                        <th style={styles.reportTh as React.CSSProperties}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {isProject2 ? (
-                        // Project 2 has it by race_ethnicity string records, we'd group them by company to show a matrix
-                        // For now, listing out the parsed EEO logs
-                        P2_EEO.slice(0, 50).map((row) => (
+                        P2_UTIL.map((row) => (
                           <tr key={row.id}>
                             <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
-                            <td colSpan={6} style={styles.reportTd as React.CSSProperties}>{row.num_employees} employees ({row.race_ethnicity} - {row.gender})</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.value)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.paid_to_date)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{row.pending_payment > 0 ? "Pending" : "Current"}</td>
                           </tr>
                         ))
                       ) : (
-                        WORKFORCE.map((emp, i) => (
-                          <tr key={i}>
-                            <td style={styles.reportTd as React.CSSProperties}><strong>{emp.employer}</strong></td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.asian}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.black}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.hispanic}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.white}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.pacific_islander}</td>
-                            <td style={styles.reportTd as React.CSSProperties}>{emp.unknown}</td>
+                        SUBCONTRACTORS.map((row) => (
+                          <tr key={row.id}>
+                            <td style={styles.reportTd as React.CSSProperties}><strong>{row.name}</strong> <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: 6 }}>{row.code}</span></td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_contract)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.towards_goal)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{fmt(row.total_paid_to_date)}</td>
+                            <td style={styles.reportTd as React.CSSProperties}>{row.balance > 0 ? "Balance Due" : "Paid Full"}</td>
                           </tr>
                         ))
                       )}
@@ -899,69 +828,93 @@ export default function DIReportEngine() {
                   </table>
                 </div>
               </div>
+            </div>
 
-              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
-                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 17 of 27</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <DackLogo scale={0.35} />
-                </div>
+            {/* ATTACHMENT A */}
+            <div className="print-page" style={styles.reportPage as React.CSSProperties}>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT A: Payment Details</h3>
+                <p style={{ ...styles.reportText, color: "#94a3b8" } as React.CSSProperties}>[Pages 14–16: Raw payment logs attached here]</p>
               </div>
             </div>
 
-            {/* ATTACHMENTS C-F (Static layout breakers to simulate 27 pages) */}
-            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT C: Contractor Logs</h3>
-              <p>[PAGES 20-21: Subcontractor site logs inserted here]</p>
-
-              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
-                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 20 of 27</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <DackLogo scale={0.35} />
+            {/* ATTACHMENT B: EEO WORKFORCE */}
+            <div className="print-page" style={{ ...styles.reportPage, maxWidth: "100%" } as React.CSSProperties}>
+              <div style={styles.reportSection as React.CSSProperties}>
+                <h3 style={styles.reportSectionTitle as React.CSSProperties}>ATTACHMENT B: EEO Workforce Utilization</h3>
+                <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
+                  <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                    <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Headcount</p>
+                    <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{isProject2 ? p2TotalHeadcount.toLocaleString() : totalHeadcount.toLocaleString()}</p>
+                  </div>
+                  {isProject2 && (
+                    <div style={{ flex: 1, padding: "16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                      <p style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px" }}>Total Hours</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{p2TotalHours.toLocaleString()}</p>
+                    </div>
+                  )}
                 </div>
+                <table style={styles.reportTable as React.CSSProperties}>
+                  <thead>
+                    <tr>
+                      <th style={styles.reportTh as React.CSSProperties}>Reporting Firm</th>
+                      <th style={styles.reportTh as React.CSSProperties}>Asian</th>
+                      <th style={styles.reportTh as React.CSSProperties}>Black</th>
+                      <th style={styles.reportTh as React.CSSProperties}>Hispanic</th>
+                      <th style={styles.reportTh as React.CSSProperties}>White</th>
+                      <th style={styles.reportTh as React.CSSProperties}>Pacific Isl.</th>
+                      <th style={styles.reportTh as React.CSSProperties}>Unknown</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isProject2 ? (
+                      P2_EEO.slice(0, 50).map((row) => (
+                        <tr key={row.id}>
+                          <td style={styles.reportTd as React.CSSProperties}><strong>{row.company}</strong></td>
+                          <td colSpan={6} style={styles.reportTd as React.CSSProperties}>{row.num_employees} employees ({row.race_ethnicity} – {row.gender})</td>
+                        </tr>
+                      ))
+                    ) : (
+                      WORKFORCE.map((emp, i) => (
+                        <tr key={i}>
+                          <td style={styles.reportTd as React.CSSProperties}><strong>{emp.employer}</strong></td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.asian}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.black}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.hispanic}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.white}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.pacific_islander}</td>
+                          <td style={styles.reportTd as React.CSSProperties}>{emp.unknown}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT D: Correspondence</h3>
-              <p>[PAGES 22-24: Email outreach documentation inserted here]</p>
 
-              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
-                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 22 of 27</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <DackLogo scale={0.35} />
+            {/* ATTACHMENTS C–F */}
+            {[
+              ["ATTACHMENT C: Contractor Logs", "Pages 20–21: Subcontractor site logs"],
+              ["ATTACHMENT D: Correspondence", "Pages 22–24: Email outreach documentation"],
+              ["ATTACHMENT E: Certificates", "Pages 25–26: MWBE/SDVOB Certifications"],
+              ["ATTACHMENT F: Waiver Determination", "Page 27: Official state waiver documentation"],
+            ].map(([title, desc]) => (
+              <div key={title} className="print-page" style={{ ...styles.reportPage, opacity: 0.6 } as React.CSSProperties}>
+                <div style={styles.reportSection as React.CSSProperties}>
+                  <h3 style={styles.reportSectionTitle as React.CSSProperties}>{title}</h3>
+                  <p style={{ ...styles.reportText, color: "#94a3b8" } as React.CSSProperties}>[{desc} — attach physical documents here]</p>
                 </div>
               </div>
-            </div>
-            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT E: Certificates</h3>
-              <p>[PAGES 25-26: MWBE/SDVOB Certifications inserted here]</p>
-
-              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
-                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 25 of 27</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <DackLogo scale={0.35} />
-                </div>
-              </div>
-            </div>
-            <div className="print-page relative-page" style={{ ...styles.reportPage, opacity: 0.5 } as React.CSSProperties}>
-              <h3 style={{ ...styles.reportSectionTitle, fontSize: 24 } as React.CSSProperties}>ATTACHMENT F: Waiver Determination</h3>
-              <p>[PAGE 27: Official state waiver documentation inserted here]</p>
-
-              <div className="print-footer" style={{ ...styles.printFooter, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', position: 'absolute', bottom: '1in', left: 0, padding: '0 1in' } as React.CSSProperties}>
-                <span style={{ fontSize: 12, color: "#333", flex: 1, textAlign: 'center' }}>Page 27 of 27</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                  <DackLogo scale={0.35} />
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         )}
-      </div>
 
-      {/* Back to Upload */}
-      <div className="no-print" style={{ textAlign: "center", padding: "24px 0 40px" }}>
-        <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
-          ← Upload New Report Data
-        </button>
+        {/* Back to Upload */}
+        <div className="no-print" style={{ textAlign: "center", padding: "24px 0 40px" }}>
+          <button style={styles.resetBtn as React.CSSProperties} onClick={() => { setScreen("upload"); setActiveTab("overview"); setUploadedFile(null); setProgress(0); }}>
+            ← Upload New Report Data
+          </button>
+        </div>
       </div>
     </div>
   );
