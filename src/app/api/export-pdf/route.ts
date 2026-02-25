@@ -1,11 +1,6 @@
 import { NextRequest } from "next/server";
 import { PDFDocument } from "pdf-lib";
 
-// Allow large request bodies for PDF attachments (up to 50MB)
-export const config = {
-  api: { bodyParser: { sizeLimit: '50mb' } },
-};
-
 // ── Currency formatter ──
 const fmt = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);

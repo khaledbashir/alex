@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  name      String
+  status    String   @default("DRAFT") // DRAFT | REVIEWED | EXPORTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // All parsed report data stored as JSON for maximum flexibility
+  projectDetails  Json @default("{}")
+  diversityGoals  Json @default("{}")
+  subcontractors  Json @default("[]")
+  workforce       Json @default("[]")
+  p2Utilization   Json @default("[]")
+  p2EEO           Json @default("[]")
+
+  // Editable text sections — Natalia can tweak these before exporting
+  editableContent Json @default("{}")
+
+  // Uploaded PDF attachments
+  attachments Attachment[]
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  slot      String   // "C", "D", "E", "F"
+  filename  String
+  data      Bytes    // The actual PDF file bytes
+  createdAt DateTime @default(now())
+
+  @@unique([reportId, slot])
+}

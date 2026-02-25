@@ -53,6 +53,7 @@ export interface ReportState {
         project_no: string;
         project_name: string;
         contractor: string;
+        total_contract_value?: number;
     };
     diversity_goals: {
         MBE: number;
@@ -71,7 +72,7 @@ export interface ReportState {
 }
 
 export const useReportStore = create<ReportState>((set) => ({
-    project_details: { project_no: '', project_name: '', contractor: '' },
+    project_details: { project_no: '', project_name: '', contractor: '', total_contract_value: 0 },
     diversity_goals: { MBE: 0.15, WBE: 0.15, SDVOB: 0.06 },
     mwbe_sdvob_subcontractors_report: [],
     workforce_demographics: [],
